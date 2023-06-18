@@ -1,0 +1,7 @@
+{ 
+    "C_Cpp.default.includePath": ["${env:MARSDEV}\\src\\sgdk170\\",
+    "${env:MARSDEV}\\src\\sgdk170",
+    "res",
+    "inc"
+]
+}
