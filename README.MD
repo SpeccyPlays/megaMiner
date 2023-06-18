@@ -1,3 +1,3 @@
-# My Awesome Game
+# Mega Miner
 
-This is My Awesome 16 Bit Cartridge game for mega Drive
+Creating ZX Spectrum game Manic Miner for the Sega Megadrive completely from scratch
