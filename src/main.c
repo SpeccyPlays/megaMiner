@@ -15,7 +15,8 @@ typedef struct {
     u16 x;
     u16 y;
     enum movements pMovements;
-    u8 spriteNum;
+    u8 currentSpriteNum; //willy will stay on same animation frame so need to track it
+    u8 numOfFrames; //used later on so we can loop from end frame to first
 } player ;
 player willy = {NULL, 48, 120, STAND, 0};
 //game stuff
