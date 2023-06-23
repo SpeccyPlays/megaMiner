@@ -15,10 +15,10 @@ typedef struct {
     u16 x;
     u16 y;
     enum movements pMovements;
-    u8 currentSpriteNum; //willy will stay on same animation frame so need to track it
-    u8 numOfFrames; //used later on so we can loop from end frame to first
+    u16 currentSpriteNum; //willy will stay on same animation frame so need to track it
+    u16 numOfFrames; //used later on so we can loop from end frame to first
 } player ;
-player willy = {NULL, 48, 120, STAND, 0};
+player willy = {NULL, 48, 120, STAND, 0, 8};
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
 enum state gameState = INTRO;
@@ -29,7 +29,8 @@ u8 yOffset =  3;
 void playIntro();
 void playGame();
 void showDeathSequence();
-u16 readInput();
+void handleInput();
+void handlePlayAnim();
 
 int main()
 {
@@ -57,7 +58,7 @@ void playIntro(){
     XGM_setLoopNumber(-1);
     XGM_startPlay(&intro);
     while (gameState == INTRO){
-        u16 value = readInput();
+        u16 value = JOY_readJoypad(JOY_1);
 	    if(value & BUTTON_START){
            gameState = PLAY;
            break;
@@ -80,24 +81,49 @@ void playGame(){
     XGM_startPlay(&megaMinerMain);
     SPR_init(0, 0, 0);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    u8 counter = 0;
     while(1)
     {
-        u16 value = readInput();
-	    if(value & BUTTON_RIGHT && willy.x < 272){
-            willy.x += 1;
+        if (counter % 2 == 0){
+            u16 flip;
+            if (willy.pMovements == WALKLEFT){
+                flip = TRUE;
+            }
+            else {
+                flip = FALSE;
+            }
+            handleInput();
+            SPR_setPosition(willy.pSprite,willy.x,willy.y);
+            SPR_setHFlip(willy.pSprite, flip);
+            SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
+            SPR_update();
+            counter = 0;
         }
-	    else if(value & BUTTON_LEFT && willy.x > 40){
-            willy.x -= 1;
-        }
-        SPR_setPosition(willy.pSprite,willy.x,willy.y);
-        SPR_update();
-        //For versions prior to SGDK 1.60 use VDP_waitVSync instead.
+            //For versions prior to SGDK 1.60 use VDP_waitVSync instead.
         SYS_doVBlankProcess();
+        counter ++;
     }
 }
 void showDeathSequence(){
 
 };
-u16 readInput(){
-    return JOY_readJoypad(JOY_1);
+void handleInput(){
+    u16 value = JOY_readJoypad(JOY_1);
+	if(value & BUTTON_RIGHT && willy.x < 267){
+        willy.pMovements = WALKRIGHT;
+        willy.x += 1;
+        handlePlayAnim();
+    }
+	else if(value & BUTTON_LEFT && willy.x > 37){
+        willy.pMovements = WALKLEFT;
+        willy.x -= 1;
+        handlePlayAnim();
+    }
+};
+void handlePlayAnim(){
+    willy.currentSpriteNum ++;
+    if (willy.currentSpriteNum >= willy.numOfFrames){
+        willy.currentSpriteNum = 0;
+    }
 }
+
