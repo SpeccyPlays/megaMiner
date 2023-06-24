@@ -9,22 +9,30 @@
 //used for keeping track of what tiles are loaded in VRAM
 u16 ind = TILE_USERINDEX;
 //player stuff
-enum movements {STAND = 0, WALKLEFT = 1 , WALKRIGHT = 2, JUMPING = 3};
+enum movements {STAND = 0, WALKLEFT = 1 , WALKRIGHT = 2};
+enum jumpOrFall {NOTHING = 0, JUMPING = 1, FALLING = 2};
 typedef struct {
     Sprite *pSprite;
     u16 x;
     u16 y;
     enum movements pMovements;
-    u16 currentSpriteNum; //willy will stay on same animation frame so need to track it
-    u16 numOfFrames; //used later on so we can loop from end frame to first
+    enum jumpOrFall pJumpOrFall;
+    u8 currentSpriteNum; //willy will stay on same animation frame so need to track it
+    u8 numOfFrames; //used later on so we can loop from end frame to first
+    u8 jumpCounter; //see how high willy has jumped
+    u8 jumpMax; //max height he can jump
+    u8 fallCounter; //Willy will die if he falls for too long
+    u8 maxFall; //max fall height in pixels
 } player ;
-player willy = {NULL, 48, 120, STAND, 0, 8};
+player willy = {NULL, 48, 120, STAND, NOTHING, 0, 12, 0, 18, 0, 24};
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
 enum state gameState = INTRO;
 //screen positioning
-u8 xOffset =  4;
+u8 xOffset =  4; //offsets are in number of 8x8 tiles
 u8 yOffset =  3;
+u16 xLeftStop = 37;
+u16 xRightStop = 267;
 //declarations
 void playIntro();
 void playGame();
@@ -99,9 +107,8 @@ void playGame(){
             SPR_update();
             counter = 0;
         }
-            //For versions prior to SGDK 1.60 use VDP_waitVSync instead.
-        SYS_doVBlankProcess();
-        counter ++;
+    counter ++;
+    SYS_doVBlankProcess();
     }
 }
 void showDeathSequence(){
@@ -109,15 +116,31 @@ void showDeathSequence(){
 };
 void handleInput(){
     u16 value = JOY_readJoypad(JOY_1);
-	if(value & BUTTON_RIGHT && willy.x < 267){
+    if (willy.pJumpOrFall == JUMPING && willy.jumpCounter <= willy.jumpMax){
+        willy.jumpCounter ++;
+        willy.y --;
+        if (willy.pMovements == WALKRIGHT && willy.x < xRightStop){
+            willy.x += 1;
+            handlePlayAnim();
+        }
+        else if(willy.pMovements == WALKLEFT && willy.x > xLeftStop){
+            willy.x -= 1;
+            handlePlayAnim();
+        }
+    }
+	else if(value & BUTTON_RIGHT && willy.x < xRightStop){
         willy.pMovements = WALKRIGHT;
         willy.x += 1;
         handlePlayAnim();
     }
-	else if(value & BUTTON_LEFT && willy.x > 37){
+	else if(value & BUTTON_LEFT && willy.x > xLeftStop){
         willy.pMovements = WALKLEFT;
         willy.x -= 1;
         handlePlayAnim();
+    }
+    if (value & BUTTON_B && willy.pJumpOrFall != JUMPING){
+        willy.pJumpOrFall = JUMPING;
+        willy.y --;
     }
 };
 void handlePlayAnim(){
