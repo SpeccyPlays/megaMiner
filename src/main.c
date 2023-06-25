@@ -28,6 +28,27 @@ player willy = {NULL, 48, 120, STAND, NOTHING, 0, 8, 0, 18, 0, 12};
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
 enum state gameState = INTRO;
+//8 = empty space 0 = ledge 1 = brick 2 = bush 3 = key 4 = spike 5 = floor that falls
+//6 = gate 7 = conveyor belt
+//first [] is y, second x
+u8 levelMap[16][32] = {
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 3, 8, 8, 2, 8, 8, 8, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 5, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 1},
+	{1, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1, 1, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
+	{1, 0, 0, 0, 0, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 0, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1, 1, 5, 5, 5, 5, 5, 0, 0, 0, 1},
+	{1, 8, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 1},
+	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+};
 //screen positioning
 u8 xOffset =  4; //offsets are in number of 8x8 tiles
 u8 yOffset =  3;
@@ -41,6 +62,7 @@ void handleInput();
 void handlePlayAnim();
 void pMoveLeft();
 void pMoveRight();
+u16 convertPixelValueToTile(u16 value);
 
 int main()
 {
@@ -92,7 +114,7 @@ void playGame(){
     SPR_init(0, 0, 0);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     u8 counter = 0;
-    while(1)
+    while(gameState == PLAY)
     {
         //using a counter too slow the play down so it's more like the original
         if (counter % 2 == 0){
@@ -103,6 +125,12 @@ void playGame(){
             else {
                 flip = FALSE;
             }
+            char x[8] = {0};
+            sprintf(x, "%d", convertPixelValueToTile((willy.x + 3)  - xOffset * 8));
+            char y[8] = {0};
+            sprintf(y, "%d", convertPixelValueToTile(willy.y- yOffset * 8));
+            VDP_drawText(x , xOffset + 1, yOffset);
+            VDP_drawText(y, xOffset + 1, yOffset + 1);
             handleInput();
             SPR_setPosition(willy.pSprite,willy.x,willy.y);
             SPR_setHFlip(willy.pSprite, flip);
@@ -115,7 +143,7 @@ void playGame(){
     }
 }
 void showDeathSequence(){
-
+    gameState = INTRO;
 };
 void handleInput(){
     u16 value = JOY_readJoypad(JOY_1);
@@ -162,15 +190,18 @@ void handleInput(){
 void pMoveLeft(){
     willy.x -= 1;
     handlePlayAnim();
-}
+};
 void pMoveRight(){
     willy.x += 1;
     handlePlayAnim();
-}
+};
 void handlePlayAnim(){
     willy.currentSpriteNum ++;
     if (willy.currentSpriteNum >= willy.numOfFrames){
         willy.currentSpriteNum = 0;
     }
+};
+u16 convertPixelValueToTile(u16 value){
+    return value >> 3; //divide by by 8
 }
 
