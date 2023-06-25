@@ -63,6 +63,10 @@ void handlePlayAnim();
 void pMoveLeft();
 void pMoveRight();
 u16 convertPixelValueToTile(u16 value);
+u8 collideDown(u16 x, u16 y);
+u8 collideUp(u16 x, u16 y);
+u8 collideLeft(u16 x, u16 y);
+u8 collideRight(u16 x, u16 y);
 
 int main()
 {
@@ -114,15 +118,15 @@ void playGame(){
     SPR_init(0, 0, 0);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     u8 counter = 0;
+    u16 flip;
     while(gameState == PLAY)
     {
         //using a counter too slow the play down so it's more like the original
         if (counter % 2 == 0){
-            u16 flip;
             if (willy.pMovements == WALKLEFT){
                 flip = TRUE;
             }
-            else {
+            else if(willy.pMovements == WALKRIGHT){
                 flip = FALSE;
             }
             char x[8] = {0};
@@ -147,16 +151,16 @@ void showDeathSequence(){
 };
 void handleInput(){
     u16 value = JOY_readJoypad(JOY_1);
-    if (willy.pJumpOrFall == JUMPING && willy.jumpCounter <= willy.jumpMax){
+    if (willy.pJumpOrFall == JUMPING && willy.jumpCounter <= willy.jumpMax && !collideUp(willy.x, willy.y) ){
         willy.jumpCounter ++;
         willy.y --;
-        if (willy.pMovements == WALKRIGHT && willy.x < xRightStop){
+        if (willy.pMovements == WALKRIGHT && !collideRight(willy.x, willy.y)){
             pMoveRight();
         }
-        else if(willy.pMovements == WALKLEFT && willy.x > xLeftStop){
+        else if(willy.pMovements == WALKLEFT && !collideLeft(willy.x, willy.y)){
             pMoveLeft();
         }
-        if (willy.jumpCounter > willy.jumpMax){
+        if (willy.jumpCounter > willy.jumpMax || collideUp(willy.x, willy.y)){
             willy.jumpCounter = 0;
             willy.pJumpOrFall = FALLING;
         }
@@ -164,23 +168,38 @@ void handleInput(){
     else if (willy.pJumpOrFall == FALLING){
         willy.fallCounter ++;
         willy.y ++;
-        if (willy.fallCounter > willy.maxFall){
-            willy.pMovements = STAND;
+        if (collideDown(willy.x , willy.y)){
+            willy.pJumpOrFall = NOTHING;
+            willy.fallCounter = 0;
         }
-        else if (willy.pMovements == WALKRIGHT && willy.x < xRightStop){
+        else if (willy.fallCounter > willy.maxFall){
+            //Willy will just helplessly fall
+        }
+        else if (willy.pMovements == WALKRIGHT && !collideRight(willy.x, willy.y)){
             pMoveRight();
         }
-        else if(willy.pMovements == WALKLEFT && willy.x > xLeftStop){
+        else if(willy.pMovements == WALKLEFT && !collideLeft(willy.x, willy.y)){
             pMoveLeft();
         }
     }
-	else if(value & BUTTON_RIGHT && willy.x < xRightStop){
+	else if(value & BUTTON_RIGHT && !collideRight(willy.x, willy.y)){
         willy.pMovements = WALKRIGHT;
         pMoveRight();
+        if (!collideDown(willy.x , willy.y)){
+            willy.pJumpOrFall = FALLING;
+            willy.pMovements = STAND;
+        }
     }
-	else if(value & BUTTON_LEFT && willy.x > xLeftStop){
+	else if(value & BUTTON_LEFT && !collideLeft(willy.x, willy.y)){
         willy.pMovements = WALKLEFT;
         pMoveLeft();
+        if (!collideDown(willy.x , willy.y)){
+            willy.pJumpOrFall = FALLING;
+            willy.pMovements = STAND;
+        }
+    }
+    else {
+        willy.pMovements = STAND;
     }
     if (value & BUTTON_B && willy.pJumpOrFall == NOTHING){
         willy.pJumpOrFall = JUMPING;
@@ -202,6 +221,65 @@ void handlePlayAnim(){
     }
 };
 u16 convertPixelValueToTile(u16 value){
-    return value >> 3; //divide by by 8
+    return value / 8; //divide by by 8
+};
+u8 collideDown(u16 x, u16 y){
+    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
+    u8 x2 = convertPixelValueToTile(x + 13 - xOffset * 8);
+    u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
+    u8 tileL = levelMap[y1 + 1][x1];
+    u8 tileR = levelMap[y1 + 1][x2];
+    if (tileL == 0 || tileR == 0){
+        VDP_drawText("Collision", xOffset + 1, yOffset + 2);
+        return 1;
+    }
+    else{
+        VDP_drawText("          ", xOffset + 1, yOffset + 2);
+        return 0;
+    }
+};
+u8 collideUp(u16 x, u16 y){
+    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
+    u8 x2 = convertPixelValueToTile(x + 13 - xOffset * 8);
+    u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
+    u8 tileL = levelMap[y1 - 1][x1];
+    u8 tileR = levelMap[y1 - 1][x2];
+    if (tileL == 1 || tileR == 1){
+        VDP_drawText("Collision", xOffset + 1, yOffset + 2);
+        return 1;
+    }
+    else{
+        VDP_drawText("          ", xOffset + 1, yOffset + 2);
+        return 0;
+    }
+};
+u8 collideLeft(u16 x, u16 y){
+    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
+    u8 y1 = convertPixelValueToTile(y + 5 - yOffset * 8);
+    u8 y2 = convertPixelValueToTile(y + 16 - yOffset * 8);
+    u8 tileT = levelMap[y2][x1];
+    u8 tileB = levelMap[y2][x1];
+    if (tileT == 1 || tileB == 1){
+        VDP_drawText("Collision LEFT", xOffset + 1, yOffset + 2);
+        return 1;
+    }
+    else{
+        VDP_drawText("               ", xOffset + 1, yOffset + 2);
+        return 0;
+    }
+};
+u8 collideRight(u16 x, u16 y){
+    u8 x1 = convertPixelValueToTile(x + 13 - xOffset * 8);
+    u8 y1 = convertPixelValueToTile(y + 5 - yOffset * 8);
+    u8 y2 = convertPixelValueToTile(y + 16 - yOffset * 8);
+    u8 tileT = levelMap[y2][x1];
+    u8 tileB = levelMap[y2][x1];
+    if (tileT == 1 || tileB == 1){
+        VDP_drawText("Collision RIGHT", xOffset + 1, yOffset + 2);
+        return 1;
+    }
+    else{
+        VDP_drawText("               ", xOffset + 1, yOffset + 2);
+        return 0;
+    }
 }
-
