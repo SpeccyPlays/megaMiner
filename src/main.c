@@ -25,16 +25,17 @@ typedef struct {
     u8 fallCounter; //Willy will die if he falls for too long
     u8 maxFall; //max fall height in pixels
 } player ;
-player willy = {NULL, 48, 120, STAND, NOTHING, 0, 8, 0, 18, 0, 12};
+player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 12};
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
 enum state gameState = INTRO;
 //8 = empty space 0 = ledge 1 = brick 2 = bush 3 = key 4 = spike 5 = floor that falls
 //6 = gate 7 = conveyor belt
 //first [] is y, second x
-u8 levelMap[16][32] = {
+u8 levelMap[17][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 1},
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
+    {1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1},
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 3, 8, 8, 2, 8, 8, 8, 1},
@@ -50,6 +51,8 @@ u8 levelMap[16][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 };
+const Image *levelsBG[5] = {&level1, &level2, &level3, &level4, &level5};
+u8 lvNumber = 0;
 //level sprites
 Sprite *keySprite = NULL;
 //screen positioning
@@ -108,7 +111,7 @@ void playIntro(){
     XGM_stopPlay();
 };
 void loadLevel(){
-    VDP_drawImageEx(BG_B, &level1, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
+    VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     ind += level1.tileset->numTile;
     //VDP_drawImageEx(BG_A, &level1foreground, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     //ind += level1foreground.tileset->numTile;

@@ -16,7 +16,7 @@ typedef struct {
     Image *lvBG_B; //main ground which has no animation
     u16 numOfEnemy;
     Enemy *lvEnemy;
-    u8 levelMap[16][32]; //20 levels each 16 x 32 tiles (8x8 tiles)
+    u8 levelMap[17][32]; //20 levels each 16 x 32 tiles (8x8 tiles)
     Sprite *lvSprites[8]; //animated tiles
 } levelData;
 
