@@ -5,6 +5,7 @@
  **/
 #include <genesis.h>
 #include <resources.h>
+#include "levels.h"
 
 //used for keeping track of what tiles are loaded in VRAM
 u16 ind = TILE_USERINDEX;
@@ -49,6 +50,8 @@ u8 levelMap[16][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 };
+//level sprites
+Sprite *keySprite = NULL;
 //screen positioning
 u8 xOffset =  4; //offsets are in number of 8x8 tiles
 u8 yOffset =  3;
@@ -56,6 +59,7 @@ u16 xLeftStop = 37;
 u16 xRightStop = 267;
 //declarations
 void playIntro();
+void loadLevel();
 void playGame();
 void showDeathSequence();
 void handleInput();
@@ -102,12 +106,12 @@ void playIntro(){
         SYS_doVBlankProcess();
     }
     XGM_stopPlay();
-}
-void playGame(){
+};
+void loadLevel(){
     VDP_drawImageEx(BG_B, &level1, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     ind += level1.tileset->numTile;
-    VDP_drawImageEx(BG_A, &level1foreground, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-    ind += level1foreground.tileset->numTile;
+    //VDP_drawImageEx(BG_A, &level1foreground, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
+    //ind += level1foreground.tileset->numTile;
     VDP_setPaletteColor(15, RGB8_8_8_TO_VDPCOLOR(255, 255, 255));
     VDP_drawText("Central Cavern", 10 + xOffset, 15 + yOffset);
     VDP_drawText("AIR", 0 + xOffset, 16 + yOffset);
@@ -117,6 +121,10 @@ void playGame(){
     XGM_startPlay(&megaMinerMain);
     SPR_init(0, 0, 0);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    keySprite = SPR_addSprite(&key, willy.x + 8, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+};
+void playGame(){
+    loadLevel();
     u8 counter = 0;
     u16 flip;
     while(gameState == PLAY)
@@ -129,12 +137,6 @@ void playGame(){
             else if(willy.pMovements == WALKRIGHT){
                 flip = FALSE;
             }
-            char x[8] = {0};
-            sprintf(x, "%d", convertPixelValueToTile((willy.x + 3)  - xOffset * 8));
-            char y[8] = {0};
-            sprintf(y, "%d", convertPixelValueToTile(willy.y- yOffset * 8));
-            VDP_drawText(x , xOffset + 1, yOffset);
-            VDP_drawText(y, xOffset + 1, yOffset + 1);
             handleInput();
             SPR_setPosition(willy.pSprite,willy.x,willy.y);
             SPR_setHFlip(willy.pSprite, flip);
@@ -145,7 +147,7 @@ void playGame(){
     counter ++;
     SYS_doVBlankProcess();
     }
-}
+};
 void showDeathSequence(){
     gameState = INTRO;
 };
@@ -163,6 +165,7 @@ void handleInput(){
         if (willy.jumpCounter > willy.jumpMax || collideUp(willy.x, willy.y)){
             willy.jumpCounter = 0;
             willy.pJumpOrFall = FALLING;
+            willy.y ++;
         }
     }
     else if (willy.pJumpOrFall == FALLING){
@@ -201,7 +204,7 @@ void handleInput(){
     else {
         willy.pMovements = STAND;
     }
-    if (value & BUTTON_B && willy.pJumpOrFall == NOTHING){
+    if (value & BUTTON_B && willy.pJumpOrFall == NOTHING && !collideUp(willy.x, willy.y)){
         willy.pJumpOrFall = JUMPING;
         willy.y --;
     }
@@ -234,7 +237,7 @@ u8 collideDown(u16 x, u16 y){
         return 1;
     }
     else{
-        VDP_drawText("          ", xOffset + 1, yOffset + 2);
+        VDP_drawText("                s", xOffset + 1, yOffset + 2);
         return 0;
     }
 };
@@ -249,16 +252,15 @@ u8 collideUp(u16 x, u16 y){
         return 1;
     }
     else{
-        VDP_drawText("          ", xOffset + 1, yOffset + 2);
+        VDP_drawText("                ", xOffset + 1, yOffset + 2);
         return 0;
     }
 };
 u8 collideLeft(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 5 - yOffset * 8);
-    u8 y2 = convertPixelValueToTile(y + 16 - yOffset * 8);
-    u8 tileT = levelMap[y2][x1];
-    u8 tileB = levelMap[y2][x1];
+    u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
+    u8 tileT = levelMap[y1][x1];
+    u8 tileB = levelMap[y1][x1];
     if (tileT == 1 || tileB == 1){
         VDP_drawText("Collision LEFT", xOffset + 1, yOffset + 2);
         return 1;
@@ -270,10 +272,9 @@ u8 collideLeft(u16 x, u16 y){
 };
 u8 collideRight(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 13 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 5 - yOffset * 8);
-    u8 y2 = convertPixelValueToTile(y + 16 - yOffset * 8);
-    u8 tileT = levelMap[y2][x1];
-    u8 tileB = levelMap[y2][x1];
+    u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
+    u8 tileT = levelMap[y1][x1];
+    u8 tileB = levelMap[y1][x1];
     if (tileT == 1 || tileB == 1){
         VDP_drawText("Collision RIGHT", xOffset + 1, yOffset + 2);
         return 1;
