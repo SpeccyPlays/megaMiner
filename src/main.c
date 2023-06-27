@@ -113,10 +113,10 @@ void loadLevel(){
     //VDP_drawImageEx(BG_A, &level1foreground, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     //ind += level1foreground.tileset->numTile;
     VDP_setPaletteColor(15, RGB8_8_8_TO_VDPCOLOR(255, 255, 255));
-    VDP_drawText("Central Cavern", 10 + xOffset, 15 + yOffset);
-    VDP_drawText("AIR", 0 + xOffset, 16 + yOffset);
-    VDP_drawText("High Score", 0 + xOffset, 17 + yOffset);
-    VDP_drawText("Score", 21 + xOffset, 17 + yOffset);
+    VDP_drawText("Central Cavern", 10 + xOffset, 16 + yOffset);
+    VDP_drawText("AIR", 0 + xOffset, 17 + yOffset);
+    VDP_drawText("High Score", 0 + xOffset, 18 + yOffset);
+    VDP_drawText("Score", 21 + xOffset, 18 + yOffset);
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
     SPR_init(0, 0, 0);
