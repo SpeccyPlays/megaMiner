@@ -51,7 +51,7 @@ u8 levelMap[17][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 };
-const Image *levelsBG[7] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7};
+const Image *levelsBG[7] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7, &level8};
 u8 lvNumber = 0;
 //level sprites
 Sprite *keySprite = NULL;
@@ -97,7 +97,7 @@ int main()
 }
 void levelDisplay(){
     PAL_setPalette(PAL0, introScreen.palette->data, DMA);
-    for (u8 i = 0; i < 7; i++){
+    for (u8 i = 0; i < 8; i++){
         VDP_drawImageEx(BG_B, levelsBG[i], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
         for (u8 j = 0; j < 60; j++){
             SYS_doVBlankProcess();

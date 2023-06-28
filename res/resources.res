@@ -7,6 +7,7 @@ IMAGE   level4              "tiles/lv4BG.png" BEST ALL
 IMAGE   level5              "tiles/lv5BG.png" BEST ALL
 IMAGE   level6              "tiles/lv6BG.png" BEST ALL
 IMAGE   level7              "tiles/lv7BG.png" BEST ALL
+IMAGE   level8              "tiles/lv8BG.png" BEST ALL
 XGM     megaMinerMain       "sound/megaMinerMain.vgm" -1
 SPRITE  minerWillySprite    "tiles/minerWilly-sheet.png"  2 2 FAST 0
 SPRITE  key                 "tiles/key-sheet.png" 1 1 FAST 10
