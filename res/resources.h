@@ -12,5 +12,7 @@ extern const Image level2;
 extern const Image level3;
 extern const Image level4;
 extern const Image level5;
+extern const Image level6;
+extern const Image level7;
 
 #endif // _RES_RESOURCES_H_

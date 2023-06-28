@@ -51,7 +51,7 @@ u8 levelMap[17][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 };
-const Image *levelsBG[5] = {&level1, &level2, &level3, &level4, &level5};
+const Image *levelsBG[7] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7};
 u8 lvNumber = 0;
 //level sprites
 Sprite *keySprite = NULL;
@@ -74,26 +74,36 @@ u8 collideDown(u16 x, u16 y);
 u8 collideUp(u16 x, u16 y);
 u8 collideLeft(u16 x, u16 y);
 u8 collideRight(u16 x, u16 y);
+void levelDisplay();
 
 int main()
 {
     while(1){
-        switch (gameState){
-            case INTRO:
-                playIntro();
-                break;
-            case PLAY:
-                playGame();
-                break;
-            case DEATH:
-                showDeathSequence();
-                break;
-        }
+        levelDisplay();
+        //switch (gameState){
+        //    case INTRO:
+        //        playIntro();
+        //        break;
+        //   case PLAY:
+        //        playGame();
+        //        break;
+        //    case DEATH:
+        //        showDeathSequence();
+        //        break;
+        //}
     }
     return(0);
     
 }
-
+void levelDisplay(){
+    PAL_setPalette(PAL0, introScreen.palette->data, DMA);
+    for (u8 i = 0; i < 7; i++){
+        VDP_drawImageEx(BG_B, levelsBG[i], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
+        for (u8 j = 0; j < 60; j++){
+            SYS_doVBlankProcess();
+        }
+    }
+}
 void playIntro(){
     PAL_setPalette(PAL0, introScreen.palette->data, DMA);
     VDP_drawImageEx(BG_B, &introScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
