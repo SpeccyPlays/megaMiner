@@ -51,7 +51,7 @@ u8 levelMap[17][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 };
-const Image *levelsBG[7] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7, &level8};
+const Image *levelsBG[8] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7, &level8};
 u8 lvNumber = 0;
 //level sprites
 Sprite *keySprite = NULL;
