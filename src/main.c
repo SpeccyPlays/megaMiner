@@ -9,6 +9,7 @@
 
 //used for keeping track of what tiles are loaded in VRAM
 u16 ind = TILE_USERINDEX;
+u16 baseInd = TILE_USERINDEX;
 //player stuff
 enum movements {STAND = 0, WALKLEFT = 1 , WALKRIGHT = 2, DEAD = 3};
 enum jumpOrFall {NOTHING = 0, JUMPING = 1, FALLING = 2};
@@ -51,7 +52,7 @@ u8 levelMap[17][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 };
-const Image *levelsBG[8] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7, &level8.
+const Image *levelsBG[20] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7, &level8,
                             &level9, &level10, &level11, &level12, &level13, &level14, &level15, &level16,
                             &level17, &level18, &level19, &level20};
 u8 lvNumber = 0;
@@ -64,6 +65,7 @@ u16 xLeftStop = 37;
 u16 xRightStop = 267;
 //declarations
 void playIntro();
+void drawHud();
 void loadLevel();
 void playGame();
 void showDeathSequence();
@@ -99,7 +101,8 @@ int main()
 }
 void levelDisplay(){
     PAL_setPalette(PAL0, introScreen.palette->data, DMA);
-    for (u8 i = 0; i < 8; i++){
+    drawHud();
+    for (u8 i = 0; i < 20; i++){
         VDP_drawImageEx(BG_B, levelsBG[i], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
         for (u8 j = 0; j < 60; j++){
             SYS_doVBlankProcess();
@@ -122,16 +125,18 @@ void playIntro(){
     }
     XGM_stopPlay();
 };
-void loadLevel(){
-    VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-    ind += level1.tileset->numTile;
-    //VDP_drawImageEx(BG_A, &level1foreground, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-    //ind += level1foreground.tileset->numTile;
+void drawHud(){
+    ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
+    VDP_drawImageEx(BG_B, &HUD, TILE_ATTR_FULL(PAL0, TRUE, FALSE, FALSE, ind), 0+xOffset, 16+yOffset, FALSE, TRUE);
+    ind += HUD.tileset->numTile;
     VDP_setPaletteColor(15, RGB8_8_8_TO_VDPCOLOR(255, 255, 255));
     VDP_drawText("Central Cavern", 10 + xOffset, 16 + yOffset);
     VDP_drawText("AIR", 0 + xOffset, 17 + yOffset);
     VDP_drawText("High Score", 0 + xOffset, 18 + yOffset);
     VDP_drawText("Score", 21 + xOffset, 18 + yOffset);
+};
+void loadLevel(){
+    VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
     SPR_init(0, 0, 0);
