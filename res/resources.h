@@ -3,11 +3,13 @@
 
 extern const u8 intro[4096];
 extern const u8 megaMinerMain[2048];
+extern const SpriteDefinition deathBoot;
 extern const SpriteDefinition minerWillySprite;
 extern const SpriteDefinition key;
 extern const SpriteDefinition dropFloor;
 extern const Image introScreen;
 extern const Image HUD;
+extern const Image deathScreen;
 extern const Image level1;
 extern const Image level2;
 extern const Image level3;

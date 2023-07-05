@@ -1,6 +1,8 @@
 IMAGE   introScreen         "tiles/introScreen.png" BEST ALL
 XGM     intro               "sound/intro.vgm" -1
 IMAGE   HUD                 "tiles/HUD.png" BEST ALL
+IMAGE   deathScreen         "tiles/deathScreen.png" BEST ALL
+SPRITE  deathBoot           "tiles/deathBoot-sheet.png" 2 16 FAST 10
 IMAGE   level1              "tiles/lv1Tiles/lv1BG.png" BEST ALL
 IMAGE   level2              "tiles/lv2Tiles/lv2BG.png" BEST ALL
 IMAGE   level3              "tiles/lv3Tiles/lv3BG.png" BEST ALL
