@@ -27,9 +27,10 @@ typedef struct {
     u8 maxFall; //max fall height in pixels
 } player ;
 player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 12};
+Sprite *boot = NULL;
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
-enum state gameState = INTRO;
+enum state gameState = DEATH;
 //8 = empty space 0 = ledge 1 = brick 2 = bush 3 = key 4 = spike 5 = floor that falls
 //6 = gate 7 = conveyor belt
 //first [] is y, second x
@@ -78,36 +79,24 @@ u8 collideDown(u16 x, u16 y);
 u8 collideUp(u16 x, u16 y);
 u8 collideLeft(u16 x, u16 y);
 u8 collideRight(u16 x, u16 y);
-void levelDisplay();
 
 int main()
 {
     while(1){
-        levelDisplay();
-        //switch (gameState){
-        //    case INTRO:
-        //        playIntro();
-        //        break;
-        //   case PLAY:
-        //        playGame();
-        //        break;
-        //    case DEATH:
-        //        showDeathSequence();
-        //        break;
-        //}
+        switch (gameState){
+            case INTRO:
+                playIntro();
+                break;
+           case PLAY:
+                playGame();
+                break;
+            case DEATH:
+                showDeathSequence();
+                break;
+        }
     }
     return(0);
     
-}
-void levelDisplay(){
-    PAL_setPalette(PAL0, introScreen.palette->data, DMA);
-    drawHud();
-    for (u8 i = 0; i < 20; i++){
-        VDP_drawImageEx(BG_B, levelsBG[i], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-        for (u8 j = 0; j < 60; j++){
-            SYS_doVBlankProcess();
-        }
-    }
 }
 void playIntro(){
     PAL_setPalette(PAL0, introScreen.palette->data, DMA);
@@ -169,7 +158,15 @@ void playGame(){
     }
 };
 void showDeathSequence(){
-    gameState = INTRO;
+    SPR_init(0, 0, 0);
+    drawHud();
+    VDP_drawImageEx(BG_B, &deathScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
+    ind += deathScreen.tileset->numTile;
+    boot = SPR_addSprite(&deathBoot, (16 + xOffset) * 8, (yOffset) * 8, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    for (u16 j = 0; j < 540; j++){
+        SPR_update();
+        SYS_doVBlankProcess();
+    }
 };
 void handleInput(){
     u16 value = JOY_readJoypad(JOY_1);

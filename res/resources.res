@@ -2,7 +2,7 @@ IMAGE   introScreen         "tiles/introScreen.png" BEST ALL
 XGM     intro               "sound/intro.vgm" -1
 IMAGE   HUD                 "tiles/HUD.png" BEST ALL
 IMAGE   deathScreen         "tiles/deathScreen.png" BEST ALL
-SPRITE  deathBoot           "tiles/deathBoot-sheet.png" 2 16 FAST 10
+SPRITE  deathBoot           "tiles/deathBoot-sheet.png" 2 16 FAST 8
 IMAGE   level1              "tiles/lv1Tiles/lv1BG.png" BEST ALL
 IMAGE   level2              "tiles/lv2Tiles/lv2BG.png" BEST ALL
 IMAGE   level3              "tiles/lv3Tiles/lv3BG.png" BEST ALL
@@ -26,4 +26,4 @@ IMAGE   level20             "tiles/lv20Tiles/lv20BG.png" BEST ALL
 XGM     megaMinerMain       "sound/megaMinerMain.vgm" -1
 SPRITE  minerWillySprite    "tiles/minerWilly-sheet.png"  2 2 FAST 0
 SPRITE  key                 "tiles/key-sheet.png" 1 1 FAST 10
-SPRITE  dropFloor           "tiles/dropFloor-sheet.png" 1 1 FAST 0
+SPRITE  dropFloor           "tiles/dropFloor-sheet.png" 1 1 FAST 12
