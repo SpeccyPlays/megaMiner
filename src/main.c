@@ -30,7 +30,7 @@ player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 12};
 Sprite *boot = NULL;
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
-enum state gameState = DEATH;
+enum state gameState = INTRO;
 //8 = empty space 0 = ledge 1 = brick 2 = bush 3 = key 4 = spike 5 = floor that falls
 //6 = gate 7 = conveyor belt
 //first [] is y, second x
@@ -67,6 +67,7 @@ u16 xRightStop = 267;
 //declarations
 void playIntro();
 void drawHud();
+void updateHud();
 void loadLevel();
 void playGame();
 void showDeathSequence();
@@ -82,12 +83,13 @@ u8 collideRight(u16 x, u16 y);
 
 int main()
 {
+    SPR_init(0, 0, 0); //start sprite engine
     while(1){
         switch (gameState){
             case INTRO:
                 playIntro();
                 break;
-           case PLAY:
+            case PLAY:
                 playGame();
                 break;
             case DEATH:
@@ -99,9 +101,11 @@ int main()
     
 }
 void playIntro(){
+    ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
     PAL_setPalette(PAL0, introScreen.palette->data, DMA);
+    drawHud();
     VDP_drawImageEx(BG_B, &introScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-    ind += introScreen.tileset->numTile;
+    //ind += introScreen.tileset->numTile;
     XGM_setLoopNumber(-1);
     XGM_startPlay(&intro);
     while (gameState == INTRO){
@@ -118,19 +122,22 @@ void drawHud(){
     ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
     VDP_drawImageEx(BG_B, &HUD, TILE_ATTR_FULL(PAL0, TRUE, FALSE, FALSE, ind), 0+xOffset, 16+yOffset, FALSE, TRUE);
     ind += HUD.tileset->numTile;
+    VDP_clearTextArea(xOffset, yOffset, 32, 168);
+};
+void updateHud(){
     VDP_setPaletteColor(15, RGB8_8_8_TO_VDPCOLOR(255, 255, 255));
     VDP_drawText("Central Cavern", 10 + xOffset, 16 + yOffset);
     VDP_drawText("AIR", 0 + xOffset, 17 + yOffset);
     VDP_drawText("High Score", 0 + xOffset, 18 + yOffset);
     VDP_drawText("Score", 21 + xOffset, 18 + yOffset);
-};
+}
 void loadLevel(){
     VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
-    SPR_init(0, 0, 0);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     keySprite = SPR_addSprite(&key, willy.x + 8, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    updateHud();
 };
 void playGame(){
     loadLevel();
@@ -153,9 +160,11 @@ void playGame(){
             SPR_update();
             counter = 0;
         }
-    counter ++;
-    SYS_doVBlankProcess();
+        counter ++;
+        SYS_doVBlankProcess();
     }
+    SPR_clear();
+    VDP_clearSprites();
 };
 void showDeathSequence(){
     SPR_init(0, 0, 0);
@@ -163,10 +172,14 @@ void showDeathSequence(){
     VDP_drawImageEx(BG_B, &deathScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     ind += deathScreen.tileset->numTile;
     boot = SPR_addSprite(&deathBoot, (16 + xOffset) * 8, (yOffset) * 8, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    for (u16 j = 0; j < 540; j++){
+    for (u16 j = 0; j < 180; j++){
         SPR_update();
         SYS_doVBlankProcess();
     }
+    SPR_clear();
+    SYS_doVBlankProcess();
+    gameState = INTRO;
+    VDP_clearSprites();
 };
 void handleInput(){
     u16 value = JOY_readJoypad(JOY_1);
@@ -224,6 +237,9 @@ void handleInput(){
     if (value & BUTTON_B && willy.pJumpOrFall == NOTHING && !collideUp(willy.x, willy.y)){
         willy.pJumpOrFall = JUMPING;
         willy.y --;
+    }
+    else if (value & BUTTON_C){
+        gameState = DEATH;
     }
 };
 void pMoveLeft(){

@@ -24,6 +24,6 @@ IMAGE   level18             "tiles/lv18Tiles/lv18BG.png" BEST ALL
 IMAGE   level19             "tiles/lv19Tiles/lv19BG.png" BEST ALL
 IMAGE   level20             "tiles/lv20Tiles/lv20BG.png" BEST ALL
 XGM     megaMinerMain       "sound/megaMinerMain.vgm" -1
-SPRITE  minerWillySprite    "tiles/minerWilly-sheet.png"  2 2 FAST 0
+SPRITE  minerWillySprite    "tiles/minerWilly-sheet.png"  2 2 FAST 0 BOX
 SPRITE  key                 "tiles/key-sheet.png" 1 1 FAST 10
 SPRITE  dropFloor           "tiles/dropFloor-sheet.png" 1 1 FAST 12
