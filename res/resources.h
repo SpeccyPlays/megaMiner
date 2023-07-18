@@ -3,7 +3,7 @@
 
 extern const u8 intro[4096];
 extern const u8 megaMinerMain[2048];
-extern const SpriteDefinition deathBoot;
+extern const SpriteDefinition minerWillySprite;
 extern const SpriteDefinition lv1BdS;
 extern const SpriteDefinition lv2BdS;
 extern const SpriteDefinition lv3BdS;
@@ -25,12 +25,19 @@ extern const SpriteDefinition lv13BdS2;
 extern const SpriteDefinition lv14BdS;
 extern const SpriteDefinition lv15BdS;
 extern const SpriteDefinition lv16BdS;
-extern const SpriteDefinition minerWillySprite;
+extern const SpriteDefinition lv17BdS;
+extern const SpriteDefinition lv17BdS2;
+extern const SpriteDefinition lv18BdS;
+extern const SpriteDefinition lv18BdS2;
+extern const SpriteDefinition lv19BdS;
+extern const SpriteDefinition lv19BdS2;
+extern const SpriteDefinition lv20BdS;
+extern const SpriteDefinition lv20BdS2;
+extern const SpriteDefinition deathBoot;
 extern const SpriteDefinition key;
 extern const SpriteDefinition dropFloor;
 extern const Image introScreen;
 extern const Image HUD;
-extern const Image deathScreen;
 extern const Image level1;
 extern const Image level2;
 extern const Image level3;
@@ -51,5 +58,6 @@ extern const Image level17;
 extern const Image level18;
 extern const Image level19;
 extern const Image level20;
+extern const Image deathScreen;
 
 #endif // _RES_RESOURCES_H_

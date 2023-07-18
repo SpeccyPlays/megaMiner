@@ -1,8 +1,10 @@
 IMAGE   introScreen         "tiles/introScreen.png" BEST ALL
-XGM     intro               "sound/intro.vgm" -1
 IMAGE   HUD                 "tiles/HUD.png" BEST ALL
-IMAGE   deathScreen         "tiles/deathScreen.png" BEST ALL
-SPRITE  deathBoot           "tiles/deathBoot-sheet.png" 2 16 FAST 8
+
+XGM     intro               "sound/intro.vgm" -1
+XGM     megaMinerMain       "sound/megaMinerMain.vgm" -1
+
+SPRITE  minerWillySprite    "tiles/minerWilly-sheet.png"  2 2 FAST 0 BOX
 
 IMAGE   level1              "tiles/lv1Tiles/lv1BG.png" BEST ALL
 SPRITE  lv1BdS              "tiles/lv1Tiles/lv1Baddie-Sheet.png" 2 2 FAST 8 BOX
@@ -58,10 +60,23 @@ IMAGE   level16             "tiles/lv16Tiles/lv16BG.png" BEST ALL
 SPRITE  lv16BdS             "tiles/lv16Tiles/lv16Baddie-Sheet.png" 2 2 FAST 8 BOX
 
 IMAGE   level17             "tiles/lv17Tiles/lv17BG.png" BEST ALL
+SPRITE  lv17BdS             "tiles/lv17Tiles/lv17Baddie-Sheet.png" 2 2 FAST 8 BOX
+SPRITE  lv17BdS2            "tiles/lv17Tiles/lv17BaddieB-Sheet.png" 2 2 FAST 8 BOX
+
 IMAGE   level18             "tiles/lv18Tiles/lv18BG.png" BEST ALL
+SPRITE  lv18BdS             "tiles/lv18Tiles/lv18Baddie-Sheet.png" 2 2 FAST 8 BOX
+SPRITE  lv18BdS2            "tiles/lv18Tiles/lv18BaddieB-Sheet.png" 2 2 FAST 8 BOX
+
 IMAGE   level19             "tiles/lv19Tiles/lv19BG.png" BEST ALL
+SPRITE  lv19BdS             "tiles/lv19Tiles/lv19Baddie-Sheet.png" 2 2 FAST 8 BOX
+SPRITE  lv19BdS2            "tiles/lv19Tiles/lv19BaddieB-Sheet.png" 2 2 FAST 8 BOX
+
 IMAGE   level20             "tiles/lv20Tiles/lv20BG.png" BEST ALL
-XGM     megaMinerMain       "sound/megaMinerMain.vgm" -1
-SPRITE  minerWillySprite    "tiles/minerWilly-sheet.png"  2 2 FAST 0 BOX
+SPRITE  lv20BdS             "tiles/lv20Tiles/lv20Baddie-Sheet.png" 2 2 FAST 8 BOX
+SPRITE  lv20BdS2            "tiles/lv20Tiles/lv20BaddieB-Sheet.png" 2 2 FAST 8 BOX
+
+IMAGE   deathScreen         "tiles/deathScreen.png" BEST ALL
+SPRITE  deathBoot           "tiles/deathBoot-sheet.png" 2 16 FAST 8
+
 SPRITE  key                 "tiles/key-sheet.png" 1 1 FAST 10
 SPRITE  dropFloor           "tiles/dropFloor-sheet.png" 1 1 FAST 12
