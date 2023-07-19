@@ -7,6 +7,11 @@
 #include <resources.h>
 #include "levels.h"
 
+//screen positioning
+u8 xOffset =  4; //offsets are in number of 8x8 tiles
+u8 yOffset =  3;
+u16 xLeftStop = 37;//19-07-23 don't think I'm using this now
+u16 xRightStop = 267;//19-07-23 don't think I'm using this now
 //used for keeping track of what tiles are loaded in VRAM
 u16 ind = TILE_USERINDEX;
 u16 baseInd = TILE_USERINDEX;
@@ -25,8 +30,9 @@ typedef struct {
     u8 jumpMax; //max height he can jump
     u8 fallCounter; //Willy will die if he falls for too long
     u8 maxFall; //max fall height in pixels
-} player ;
-player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 12};
+} Player ;
+Player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 12};//change x and y so don't include offset ?
+Enemy baddie = {NULL, 72 + 32, 104 + 32, 0, 0, 72 + 32, 56 + 24, 1, FALSE};
 Sprite *boot = NULL;
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
@@ -58,12 +64,8 @@ const Image *levelsBG[20] = {&level1, &level2, &level3, &level4, &level5, &level
                             &level17, &level18, &level19, &level20};
 u8 lvNumber = 0;
 //level sprites
-Sprite *keySprite = NULL;
-//screen positioning
-u8 xOffset =  4; //offsets are in number of 8x8 tiles
-u8 yOffset =  3;
-u16 xLeftStop = 37;
-u16 xRightStop = 267;
+Sprite *keySprite[10] = {NULL};
+
 //declarations
 void playIntro();
 void drawHud();
@@ -136,7 +138,7 @@ void loadLevel(){
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    keySprite = SPR_addSprite(&key, willy.x + 8, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    baddie.eSprite = SPR_addSprite(&lv1BdS, baddie.xStart, baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     updateHud();
 };
 void playGame(){
@@ -154,12 +156,22 @@ void playGame(){
                 flip = FALSE;
             }
             handleInput();
-            SPR_setPosition(willy.pSprite,willy.x,willy.y);
+            SPR_setPosition(baddie.eSprite, baddie.xPos, baddie.yPos);
+            SPR_setHFlip(baddie.eSprite, baddie.facingLeft);
+            SPR_setPosition(willy.pSprite,willy.x,willy.y); 
             SPR_setHFlip(willy.pSprite, flip);
             SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
             SPR_update();
+        }
+        if (counter % 4 == 0){
+            baddie.xPos += baddie.moveIncrement;
+            if (baddie.xPos - 16 >= baddie.xEnd || baddie.xPos <= baddie.xStart){
+                baddie.moveIncrement = baddie.moveIncrement * - 1;
+                baddie.facingLeft = !baddie.facingLeft;
+            }
             counter = 0;
         }
+
         counter ++;
         SYS_doVBlankProcess();
     }

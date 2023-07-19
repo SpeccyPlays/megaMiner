@@ -10,6 +10,10 @@ typedef struct {
     u16 xEnd;
     u16 yStart;
     u16 yEnd;
+    u16 xPos;
+    u16 yPos;
+    s8 moveIncrement; //will either be 1 or -1
+    bool facingLeft;
 } Enemy;
 u8 currentLevel;
 typedef struct {
