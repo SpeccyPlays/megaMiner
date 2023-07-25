@@ -37,8 +37,8 @@ Sprite *boot = NULL;
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
 enum state gameState = INTRO;
-//8 = empty space 0 = ledge 1 = brick 2 = bush 3 = key 4 = spike 5 = floor that falls
-//6 = gate 7 = conveyor belt
+//8 = empty space; 0 = ledge; 1 = brick; 2 = bush; 3 = key; 4 = spike; 5 = floor that falls
+//6 = gate; 7 = conveyor belt
 //first [] is y, second x
 u8 levelMap[17][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 1},
@@ -64,7 +64,6 @@ const Image *levelsBG[20] = {&level1, &level2, &level3, &level4, &level5, &level
                             &level17, &level18, &level19, &level20};
 u8 lvNumber = 0;
 //level sprites
-Sprite *keySprite[10] = {NULL};
 
 //declarations
 void playIntro();
@@ -82,6 +81,7 @@ u8 collideDown(u16 x, u16 y);
 u8 collideUp(u16 x, u16 y);
 u8 collideLeft(u16 x, u16 y);
 u8 collideRight(u16 x, u16 y);
+u8 objectChecking(u8 objectToCheck);
 
 int main()
 {
@@ -161,7 +161,7 @@ void playGame(){
             SPR_setPosition(willy.pSprite,willy.x,willy.y); 
             SPR_setHFlip(willy.pSprite, flip);
             SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
-            SPR_update();
+            SPR_update();//19-7-23 maybe move this to main loop
         }
         if (counter % 4 == 0){
             baddie.xPos += baddie.moveIncrement;
@@ -277,12 +277,12 @@ u8 collideDown(u16 x, u16 y){
     u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
     u8 tileL = levelMap[y1 + 1][x1];
     u8 tileR = levelMap[y1 + 1][x2];
-    if (tileL == 0 || tileR == 0){
+    if (tileL != 8 || tileR != 8){
         VDP_drawText("Collision", xOffset + 1, yOffset + 2);
         return 1;
     }
     else{
-        VDP_drawText("                s", xOffset + 1, yOffset + 2);
+        VDP_drawText("                 ", xOffset + 1, yOffset + 2);
         return 0;
     }
 };
@@ -328,4 +328,7 @@ u8 collideRight(u16 x, u16 y){
         VDP_drawText("               ", xOffset + 1, yOffset + 2);
         return 0;
     }
+}
+u8 objectChecking(u8 objectToCheck){
+    return 0;
 }
