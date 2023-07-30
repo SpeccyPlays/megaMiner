@@ -16,8 +16,8 @@ u16 xRightStop = 267;//19-07-23 don't think I'm using this now
 u16 ind = TILE_USERINDEX;
 u16 baseInd = TILE_USERINDEX;
 //player stuff
-enum movements {STAND = 0, WALKLEFT = 1 , WALKRIGHT = 2, DEAD = 3};
-enum jumpOrFall {NOTHING = 0, JUMPING = 1, FALLING = 2};
+enum movements {STAND = 0, WALKLEFT = 1 , WALKRIGHT = 2, DEAD = 3, BLOCKED = 4};
+enum jumpOrFall {NOTHING = 0, JUMPING = 1, FALLING = 2, FALL = 3};
 typedef struct {
     Sprite *pSprite;
     u16 x;
@@ -212,12 +212,19 @@ void handleInput(){
         else {
             willy.pMovements = STAND;
         }
+        if (!collideDown(willy.x, willy.y)) {
+            //willy.pMovements = STAND;
+            willy.pJumpOrFall = FALL;
+        }
         if (value & BUTTON_B){
             willy.pJumpOrFall = JUMPING;
         }
         else if (value & BUTTON_C){
             gameState = DEATH;
         }
+    }
+    else if (willy.pJumpOrFall == FALL){
+        pFalling();
     }
     else if (willy.pJumpOrFall == JUMPING || willy.pJumpOrFall == FALLING){
         if (willy.pMovements == WALKRIGHT){
@@ -227,13 +234,19 @@ void handleInput(){
             pMoveLeft();
         }
         if (willy.pJumpOrFall == JUMPING){
-            pJumping();
+            if (!collideUp(willy.x, willy.y)){
+                pJumping();
+            }
+            else {
+                willy.jumpCounter = 0;
+                willy.pJumpOrFall = FALLING;
+            }
         }
         else if (willy.pJumpOrFall == FALLING){
             pFalling();
         }
     }
-    //pCollisions(willy.x, willy.y);
+    pCollisions(willy.x, willy.y);
 };
 void pMoveLeft(){
     willy.x -= 1;
@@ -275,18 +288,18 @@ u16 convertPixelValueToTile(u16 value){
     return value >> 3; //divide by by 8
 };
 void pCollisions(u16 x, u16 y){
-    if (willy.pJumpOrFall != JUMPING){
-        collideDown(x, y);
+    if (collideLeft(x, y) || collideRight(x, y)){
+        willy.pMovements = STAND;
     }
 }
 u8 collideDown(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 4 - (xOffset * 8));
+    u8 x1 = convertPixelValueToTile(x + 3 - (xOffset * 8));
     u8 x2 = convertPixelValueToTile(x + 14 - (xOffset * 8));
     u8 y1 = convertPixelValueToTile(y + 16 - (yOffset * 8));
     u8 tileL = levelMap[y1 + 1][x1];
     u8 tileR = levelMap[y1 + 1][x2];
     if (tileL != 8 || tileR != 8){
-        VDP_drawText("Collision", xOffset + 1, yOffset + 2);
+        VDP_drawText("Collision down", xOffset + 1, yOffset + 2);
         return 1;
     }
     else{
@@ -295,13 +308,13 @@ u8 collideDown(u16 x, u16 y){
     }
 };
 u8 collideUp(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 4 - xOffset * 8);
+    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
     u8 x2 = convertPixelValueToTile(x + 14 - xOffset * 8);
     u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
     u8 tileL = levelMap[y1 - 1][x1];
     u8 tileR = levelMap[y1 - 1][x2];
     if (tileL == 1 || tileR == 1){
-        VDP_drawText("Collision", xOffset + 1, yOffset + 2);
+        VDP_drawText("Collision up", xOffset + 1, yOffset + 2);
         return 1;
     }
     else{
@@ -310,30 +323,32 @@ u8 collideUp(u16 x, u16 y){
     }
 };
 u8 collideLeft(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 4 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
-    u8 tileT = levelMap[y1][x1];
+    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
+    u8 y1 = convertPixelValueToTile(y + 14 - yOffset * 8);
+    //u8 tileT = levelMap[y1][x1];
     u8 tileB = levelMap[y1][x1];
-    if (tileT == 1 || tileB == 1){
-        VDP_drawText("Collision LEFT", xOffset + 1, yOffset + 2);
+    if (tileB == 1){
+        //VDP_drawText("Collision LEFT", xOffset + 1, yOffset + 2);
+        willy.x += 2;
         return 1;
     }
     else{
-        VDP_drawText("               ", xOffset + 1, yOffset + 2);
+        //VDP_drawText("               ", xOffset + 1, yOffset + 2);
         return 0;
     }
 };
 u8 collideRight(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 14 - xOffset * 8);
     u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
-    u8 tileT = levelMap[y1][x1];
+    //u8 tileT = levelMap[y1][x1];
     u8 tileB = levelMap[y1][x1];
-    if (tileT == 1 || tileB == 1){
-        VDP_drawText("Collision RIGHT", xOffset + 1, yOffset + 2);
+    if (tileB == 1){
+        //VDP_drawText("Collision RIGHT", xOffset + 1, yOffset + 2);
+        willy.x -=2;
         return 1;
     }
     else{
-        VDP_drawText("               ", xOffset + 1, yOffset + 2);
+        //VDP_drawText("               ", xOffset + 1, yOffset + 2);
         return 0;
     }
 }
