@@ -1,0 +1,61 @@
+void handleInput(){
+    u16 value = JOY_readJoypad(JOY_1);
+    if (willy.pJumpOrFall == JUMPING && willy.jumpCounter <= willy.jumpMax && !collideUp(willy.x, willy.y) ){
+        willy.jumpCounter ++;
+        willy.y --;
+        if (willy.pMovements == WALKRIGHT && !collideRight(willy.x, willy.y)){
+            pMoveRight();
+        }
+        else if(willy.pMovements == WALKLEFT && !collideLeft(willy.x, willy.y)){
+            pMoveLeft();
+        }
+        if (willy.jumpCounter > willy.jumpMax || collideUp(willy.x, willy.y)){
+            willy.jumpCounter = 0;
+            willy.pJumpOrFall = FALLING;
+            willy.y ++;
+        }
+    }
+    else if (willy.pJumpOrFall == FALLING){
+        willy.fallCounter ++;
+        willy.y ++;
+        if (collideDown(willy.x , willy.y)){
+            willy.pJumpOrFall = NOTHING;
+            willy.fallCounter = 0;
+        }
+        else if (willy.fallCounter > willy.maxFall){
+            //Willy will just helplessly fall
+        }
+        else if (willy.pMovements == WALKRIGHT && !collideRight(willy.x, willy.y)){
+            pMoveRight();
+        }
+        else if(willy.pMovements == WALKLEFT && !collideLeft(willy.x, willy.y)){
+            pMoveLeft();
+        }
+    }
+	else if(value & BUTTON_RIGHT && !collideRight(willy.x, willy.y)){
+        willy.pMovements = WALKRIGHT;
+        pMoveRight();
+        if (!collideDown(willy.x , willy.y)){
+            willy.pJumpOrFall = FALLING;
+            willy.pMovements = STAND;
+        }
+    }
+	else if(value & BUTTON_LEFT && !collideLeft(willy.x, willy.y)){
+        willy.pMovements = WALKLEFT;
+        pMoveLeft();
+        if (!collideDown(willy.x , willy.y)){
+            willy.pJumpOrFall = FALLING;
+            willy.pMovements = STAND;
+        }
+    }
+    else {
+        willy.pMovements = STAND;
+    }
+    if (value & BUTTON_B && willy.pJumpOrFall == NOTHING && !collideUp(willy.x, willy.y)){
+        willy.pJumpOrFall = JUMPING;
+        willy.y --;
+    }
+    else if (value & BUTTON_C){
+        gameState = DEATH;
+    }
+};

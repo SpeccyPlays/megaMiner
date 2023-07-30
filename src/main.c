@@ -31,7 +31,7 @@ typedef struct {
     u8 fallCounter; //Willy will die if he falls for too long
     u8 maxFall; //max fall height in pixels
 } Player ;
-Player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 12};//change x and y so don't include offset ?
+Player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 100};//change x and y so don't include offset ?
 Enemy baddie = {NULL, 72 + 32, 104 + 32, 0, 0, 72 + 32, 56 + 24, 1, FALSE};
 Sprite *boot = NULL;
 //game stuff
@@ -76,7 +76,10 @@ void handleInput();
 void handlePlayAnim();
 void pMoveLeft();
 void pMoveRight();
+void pJumping();
+void pFalling();
 u16 convertPixelValueToTile(u16 value);
+void pCollisions(u16 x, u16 y);
 u8 collideDown(u16 x, u16 y);
 u8 collideUp(u16 x, u16 y);
 u8 collideLeft(u16 x, u16 y);
@@ -194,65 +197,43 @@ void showDeathSequence(){
     VDP_clearSprites();
 };
 void handleInput(){
-    u16 value = JOY_readJoypad(JOY_1);
-    if (willy.pJumpOrFall == JUMPING && willy.jumpCounter <= willy.jumpMax && !collideUp(willy.x, willy.y) ){
-        willy.jumpCounter ++;
-        willy.y --;
-        if (willy.pMovements == WALKRIGHT && !collideRight(willy.x, willy.y)){
+    //In the original you can't change direction of the jump or when falling
+    //so only check the controls when player is doing neithr
+    if (willy.pJumpOrFall == NOTHING){
+        u16 value = JOY_readJoypad(JOY_1);
+        if (value & BUTTON_RIGHT){
+            willy.pMovements = WALKRIGHT;
             pMoveRight();
         }
-        else if(willy.pMovements == WALKLEFT && !collideLeft(willy.x, willy.y)){
+        else if(value & BUTTON_LEFT){
+            willy.pMovements = WALKLEFT;
             pMoveLeft();
         }
-        if (willy.jumpCounter > willy.jumpMax || collideUp(willy.x, willy.y)){
-            willy.jumpCounter = 0;
-            willy.pJumpOrFall = FALLING;
-            willy.y ++;
+        else {
+            willy.pMovements = STAND;
+        }
+        if (value & BUTTON_B){
+            willy.pJumpOrFall = JUMPING;
+        }
+        else if (value & BUTTON_C){
+            gameState = DEATH;
         }
     }
-    else if (willy.pJumpOrFall == FALLING){
-        willy.fallCounter ++;
-        willy.y ++;
-        if (collideDown(willy.x , willy.y)){
-            willy.pJumpOrFall = NOTHING;
-            willy.fallCounter = 0;
-        }
-        else if (willy.fallCounter > willy.maxFall){
-            //Willy will just helplessly fall
-        }
-        else if (willy.pMovements == WALKRIGHT && !collideRight(willy.x, willy.y)){
+    else if (willy.pJumpOrFall == JUMPING || willy.pJumpOrFall == FALLING){
+        if (willy.pMovements == WALKRIGHT){
             pMoveRight();
         }
-        else if(willy.pMovements == WALKLEFT && !collideLeft(willy.x, willy.y)){
+        else if (willy.pMovements == WALKLEFT){
             pMoveLeft();
         }
-    }
-	else if(value & BUTTON_RIGHT && !collideRight(willy.x, willy.y)){
-        willy.pMovements = WALKRIGHT;
-        pMoveRight();
-        if (!collideDown(willy.x , willy.y)){
-            willy.pJumpOrFall = FALLING;
-            willy.pMovements = STAND;
+        if (willy.pJumpOrFall == JUMPING){
+            pJumping();
+        }
+        else if (willy.pJumpOrFall == FALLING){
+            pFalling();
         }
     }
-	else if(value & BUTTON_LEFT && !collideLeft(willy.x, willy.y)){
-        willy.pMovements = WALKLEFT;
-        pMoveLeft();
-        if (!collideDown(willy.x , willy.y)){
-            willy.pJumpOrFall = FALLING;
-            willy.pMovements = STAND;
-        }
-    }
-    else {
-        willy.pMovements = STAND;
-    }
-    if (value & BUTTON_B && willy.pJumpOrFall == NOTHING && !collideUp(willy.x, willy.y)){
-        willy.pJumpOrFall = JUMPING;
-        willy.y --;
-    }
-    else if (value & BUTTON_C){
-        gameState = DEATH;
-    }
+    //pCollisions(willy.x, willy.y);
 };
 void pMoveLeft(){
     willy.x -= 1;
@@ -262,6 +243,28 @@ void pMoveRight(){
     willy.x += 1;
     handlePlayAnim();
 };
+void pJumping(){
+    if (willy.jumpCounter <= willy.jumpMax){
+        willy.jumpCounter ++;
+        willy.y --;
+    }
+   else if (willy.jumpCounter > willy.jumpMax){
+        willy.jumpCounter = 0;
+        willy.pJumpOrFall = FALLING;
+        willy.y ++;
+    }
+};
+void pFalling(){
+    willy.fallCounter ++;
+    willy.y ++;
+    if (collideDown(willy.x, willy.y)){  
+        willy.fallCounter = 0;
+        willy.pJumpOrFall = NOTHING;
+    }
+    if (willy.fallCounter > willy.maxFall){
+            //willy.pMovements = DEAD;
+    }
+};
 void handlePlayAnim(){
     willy.currentSpriteNum ++;
     if (willy.currentSpriteNum >= willy.numOfFrames){
@@ -269,12 +272,17 @@ void handlePlayAnim(){
     }
 };
 u16 convertPixelValueToTile(u16 value){
-    return value / 8; //divide by by 8
+    return value >> 3; //divide by by 8
 };
+void pCollisions(u16 x, u16 y){
+    if (willy.pJumpOrFall != JUMPING){
+        collideDown(x, y);
+    }
+}
 u8 collideDown(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
-    u8 x2 = convertPixelValueToTile(x + 13 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
+    u8 x1 = convertPixelValueToTile(x + 4 - (xOffset * 8));
+    u8 x2 = convertPixelValueToTile(x + 14 - (xOffset * 8));
+    u8 y1 = convertPixelValueToTile(y + 16 - (yOffset * 8));
     u8 tileL = levelMap[y1 + 1][x1];
     u8 tileR = levelMap[y1 + 1][x2];
     if (tileL != 8 || tileR != 8){
@@ -287,8 +295,8 @@ u8 collideDown(u16 x, u16 y){
     }
 };
 u8 collideUp(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
-    u8 x2 = convertPixelValueToTile(x + 13 - xOffset * 8);
+    u8 x1 = convertPixelValueToTile(x + 4 - xOffset * 8);
+    u8 x2 = convertPixelValueToTile(x + 14 - xOffset * 8);
     u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
     u8 tileL = levelMap[y1 - 1][x1];
     u8 tileR = levelMap[y1 - 1][x2];
@@ -302,7 +310,7 @@ u8 collideUp(u16 x, u16 y){
     }
 };
 u8 collideLeft(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
+    u8 x1 = convertPixelValueToTile(x + 4 - xOffset * 8);
     u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
     u8 tileT = levelMap[y1][x1];
     u8 tileB = levelMap[y1][x1];
@@ -316,7 +324,7 @@ u8 collideLeft(u16 x, u16 y){
     }
 };
 u8 collideRight(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 13 - xOffset * 8);
+    u8 x1 = convertPixelValueToTile(x + 14 - xOffset * 8);
     u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
     u8 tileT = levelMap[y1][x1];
     u8 tileB = levelMap[y1][x1];

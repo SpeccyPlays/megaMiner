@@ -3,5 +3,9 @@
     "${env:MARSDEV}\\src\\sgdk170",
     "res",
     "inc"
-]
+],
+"files.associations": {
+    "type_traits": "c",
+    "utility": "c"
+}
 }
