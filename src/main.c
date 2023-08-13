@@ -68,6 +68,8 @@ u8 levelMap[17][32] = {
 const Image *levelsBG[20] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7, &level8,
                             &level9, &level10, &level11, &level12, &level13, &level14, &level15, &level16,
                             &level17, &level18, &level19, &level20};
+const u8 *collisionMaps[20] = {lv1Cm, lv2Cm, lv3Cm, lv4Cm, lv5Cm, lv6Cm, lv7Cm, lv8Cm, lv9Cm, lv10Cm,
+                        lv11Cm, lv12Cm, lv13Cm, lv14Cm, lv15Cm, lv16Cm, lv17Cm, lv18Cm, lv19Cm, lv20Cm};
 u8 lvNumber = 0;
 //level sprites
 
