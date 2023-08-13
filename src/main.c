@@ -37,8 +37,14 @@ Sprite *boot = NULL;
 //game stuff
 enum state {INTRO = 0, PLAY = 1, DEATH = 2};
 enum state gameState = INTRO;
-//8 = empty space; 0 = ledge; 1 = brick; 2 = bush; 3 = key; 4 = spike; 5 = floor that falls
-//6 = gate; 7 = conveyor belt
+//16 tiles level item key
+//0 = nothing
+//1 = normal floor
+//2 = drop floor
+//3 = belt
+//4 = brick
+//5 = something that will kill willy
+//6 = gate
 //first [] is y, second x
 u8 levelMap[17][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 1},
