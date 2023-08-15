@@ -48,18 +48,53 @@ lv11BdS2, 40, 167, 104, 104
 lv11BdS2, 112, 159, 48, 48
 lv11BdS2, 120, 107, 24, 24
 
-lv12BdS,
-lv12BdS2,
-lv13BdS,
-lv13BdS2,
+lv12BdS, 8, 87, 104, 104, 
+lv12BdS, 88, 137 (note goes to 159 when wall removed by switch) 88, 88
+lv12BdS, 200, 239, 48, 48
+lv12BdS2, 120, 120, 0, 0 (note will fall down to 104 once left switch hit)
+
+lv13BdS, 8, 247, 8, 8
+lv13BdS, 8, 247, 32, 32
+lv13BdS, 8, 247, 56, 56
+lv13BdS, 8, 247, 80, 80
+lv13BdS2, 40, 40, 8, 104
+
+lv14BdS, (need to work out pattern, only ever 3 on screen)
 lv14BdS,
-lv15BdS,
-lv16BdS,
-lv17BdS,
-lv17BdS2
-lv18BdS,
-lv18BdS2,
-lv19BdS,
-lv19BdS2,
-lv20BdS,
-lv20BdS2
+lv14BdS,
+
+lv15BdS, 80, 80, 32, 104
+lv15BdS, 128, 128, 32, 104
+lv15BdS, 168, 168, 32, 104
+
+lv16BdS, 8, 183, 104, 104
+lv16BdS, 8, 79, 80, 80
+lv16BdS, 144, 199, 56, 56
+lv16BdS, 200, 247, 40, 40
+
+lv17BdS, 40, 79, 104, 104
+lv17BdS, 96, 215, 104, 104
+lv17BdS2 24, 24, 64, 104
+lv17BdS2 80, 80, 0, 104
+lv17BdS2 152, 152, 0, 64
+lv17BdS2 216, 216, 0, 96
+
+lv18BdS, 94, 159, 24, 24
+lv18BdS, 94, 159, 48, 48
+lv18BdS, 94, 159, 80, 80
+lv18BdS, 94, 159, 104, 104
+lv18BdS2, 40, 40, 0, 104
+lv18BdS2, 80, 80, 0, 104
+lv18BdS2, 160, 160, 0, 104
+lv18BdS2, 200, 200, 0, 104
+
+lv19BdS, 184, 247, 24, 24
+lv19BdS, 175, 247, 48, 48
+lv19BdS, 184, 247, 72, 72,
+lv19BdS, 96, 247, 104, 104
+lv19BdS2, 40, 40, 0, 104
+lv19BdS2, 88, 88, 48, 104
+lv19BdS2, 128, 128, 0, 80
+
+lv20BdS, 56, 191, 104, 104
+lv20BdS2 192, 192, 40, 104
