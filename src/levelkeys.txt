@@ -1,0 +1,21 @@
+Type of key, amount of keys, xy locations
+Key, 5
+Bat, 5
+Key, 5
+Key, 5
+Box, 5
+Key, 5
+Key, 5
+Banana, 4
+Key, 1
+Bauble, 5
+10p, 5
+Banana, 5
+No idea, 5
+Chip, 4
+Money Bag, 3
+Squares, 4
+Key, 5
+Key, 1
+Key, 2
+Key, 5

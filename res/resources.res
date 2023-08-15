@@ -78,5 +78,5 @@ SPRITE  lv20BdS2            "tiles/lv20Tiles/lv20BaddieB-Sheet.png" 2 2 FAST 5 B
 IMAGE   deathScreen         "tiles/deathScreen.png" BEST ALL
 SPRITE  deathBoot           "tiles/deathBoot-sheet.png" 2 16 FAST 8
 
-SPRITE  key                 "tiles/key-sheet.png" 1 1 FAST 10
+SPRITE  key                 "tiles/keySprites/key-sheet.png" 1 1 FAST 10
 SPRITE  dropFloor           "tiles/dropFloor-sheet.png" 1 1 FAST 12
