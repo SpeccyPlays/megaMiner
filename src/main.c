@@ -6,10 +6,13 @@
 #include <genesis.h>
 #include <resources.h>
 #include "levels.h"
+#include "game.h"
+#include "mainplayer.h"
+#include "baddie.h"
 
 //screen positioning
-u8 xOffset =  4; //offsets are in number of 8x8 tiles
-u8 yOffset =  3;
+const u8 xOffset = 4; //offsets are in number of 8x8 tiles
+const u8 yOffset = 3;
 u16 xLeftStop = 37;//19-07-23 don't think I'm using this now
 u16 xRightStop = 267;//19-07-23 don't think I'm using this now
 //used for keeping track of what tiles are loaded in VRAM
