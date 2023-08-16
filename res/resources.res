@@ -30,6 +30,7 @@ SPRITE  lv7BdS              "tiles/BaddieSheets/lv7Baddie-Sheet.png" 2 2 FAST 5 
 
 IMAGE   level8              "tiles/lvBGs/lv8BG.png" BEST ALL
 SPRITE  lv8BdS              "tiles/BaddieSheets/lv8Baddie-Sheet.png" 2 2 FAST 5 BOX
+SPRITE  lv8BdS2             "tiles/BaddieSheets/lv8BaddieB-Sheet.png" 2 2 FAST 5 BOX
 
 IMAGE   level9              "tiles/lvBGs/lv9BG.png" BEST ALL
 SPRITE  lv9BdS              "tiles/BaddieSheets/lv9Baddie-Sheet.png" 2 2 FAST 5 BOX
@@ -79,4 +80,13 @@ IMAGE   deathScreen         "tiles/deathScreen.png" BEST ALL
 SPRITE  deathBoot           "tiles/deathBoot-sheet.png" 2 16 FAST 8
 
 SPRITE  key                 "tiles/keySprites/key-sheet.png" 1 1 FAST 10
+SPRITE  kbanana             "tiles/keySprites/banana-Sheet.png" 1 1 FAST 10
+SPRITE  kbauble             "tiles/keySprites/bauble-Sheet.png" 1 1 FAST 10
+SPRITE  kbox                "tiles/keySprites/box-Sheet.png" 1 1 FAST 10
+SPRITE  kchips              "tiles/keySprites/chips-Sheet.png" 1 1 FAST 10
+SPRITE  knoidea             "tiles/keySprites/noidea-Sheet.png" 1 1 FAST 10
+SPRITE  kp10                "tiles/keySprites/p10-Sheet.png" 1 1 FAST 10
+SPRITE  ksquares            "tiles/keySprites/squares-Sheet.png" 1 1 FAST 10
+SPRITE  kmoney              "tiles/keySprites/moneybag-Sheet.png" 1 1 FAST 10
+
 SPRITE  dropFloor           "tiles/dropFloor-sheet.png" 1 1 FAST 12
