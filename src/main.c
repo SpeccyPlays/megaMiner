@@ -9,45 +9,29 @@
 #include "game.h"
 #include "mainplayer.h"
 #include "baddie.h"
+#include "collisionMaps.h"
 
 //screen positioning
 const u8 xOffset = 4; //offsets are in number of 8x8 tiles
 const u8 yOffset = 3;
+u16 xOffsetPixel = 0; //pixel off sets will be used for sprites
+u16 yOffsetPixel = 0; //we update the value in main - tile offset * 8
+u8 xLvTileWidth = 32;
+u8 yLvTileHeight = 16;
+u16 tilesPerLevel = 512;
+
+//i = x + width*y; for traversing 1d array as 2d array space
 u16 xLeftStop = 37;//19-07-23 don't think I'm using this now
 u16 xRightStop = 267;//19-07-23 don't think I'm using this now
 //used for keeping track of what tiles are loaded in VRAM
 u16 ind = TILE_USERINDEX;
 u16 baseInd = TILE_USERINDEX;
-//player stuff
-enum movements {STAND = 0, WALKLEFT = 1 , WALKRIGHT = 2, DEAD = 3, BLOCKED = 4};
-enum jumpOrFall {NOTHING = 0, JUMPING = 1, FALLING = 2, FALL = 3};
-typedef struct {
-    Sprite *pSprite;
-    u16 x;
-    u16 y;
-    enum movements pMovements;
-    enum jumpOrFall pJumpOrFall;
-    u8 currentSpriteNum; //willy will stay on same animation frame so need to track it
-    u8 numOfFrames; //used later on so we can loop from end frame to first
-    u8 jumpCounter; //see how high willy has jumped
-    u8 jumpMax; //max height he can jump
-    u8 fallCounter; //Willy will die if he falls for too long
-    u8 maxFall; //max fall height in pixels
-} Player ;
+
 Player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 100};//change x and y so don't include offset ?
-Enemy baddie = {NULL, 72 + 32, 104 + 32, 0, 0, 72 + 32, 56 + 24, 1, FALSE};
 Sprite *boot = NULL;
+Enemy lv1Baddie = {&lv1BdS, 64, 135, 56, 56, 64, 56, 1, FALSE};
 //game stuff
-enum state {INTRO = 0, PLAY = 1, DEATH = 2};
 enum state gameState = INTRO;
-//16 tiles level item key
-//0 = nothing
-//1 = normal floor
-//2 = drop floor
-//3 = belt
-//4 = brick
-//5 = something that will kill willy
-//6 = gate
 //first [] is y, second x
 u8 levelMap[17][32] = {
 	{1, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 1},
@@ -71,8 +55,6 @@ u8 levelMap[17][32] = {
 const Image *levelsBG[20] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7, &level8,
                             &level9, &level10, &level11, &level12, &level13, &level14, &level15, &level16,
                             &level17, &level18, &level19, &level20};
-const u8 *collisionMaps[20] = {lv1Cm, lv2Cm, lv3Cm, lv4Cm, lv5Cm, lv6Cm, lv7Cm, lv8Cm, lv9Cm, lv10Cm,
-                        lv11Cm, lv12Cm, lv13Cm, lv14Cm, lv15Cm, lv16Cm, lv17Cm, lv18Cm, lv19Cm, lv20Cm};
 u8 lvNumber = 0;
 //level sprites
 
@@ -99,6 +81,8 @@ u8 objectChecking(u8 objectToCheck);
 
 int main()
 {
+    xOffsetPixel = xOffset * 8;
+    yOffsetPixel = yOffset * 8;
     SPR_init(0, 0, 0); //start sprite engine
     while(1){
         switch (gameState){
@@ -142,7 +126,7 @@ void drawHud(){
 };
 void updateHud(){
     VDP_setPaletteColor(15, RGB8_8_8_TO_VDPCOLOR(255, 255, 255));
-    VDP_drawText("Central Cavern", 10 + xOffset, 16 + yOffset);
+    VDP_drawText(levelNames[lvNumber], xOffset, 16 + yOffset);
     VDP_drawText("AIR", 0 + xOffset, 17 + yOffset);
     VDP_drawText("High Score", 0 + xOffset, 18 + yOffset);
     VDP_drawText("Score", 21 + xOffset, 18 + yOffset);
@@ -152,7 +136,13 @@ void loadLevel(){
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    baddie.eSprite = SPR_addSprite(&lv1BdS, baddie.xStart, baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    //baddie.eSprite = SPR_addSprite(&lv1BdS, baddie.xStart, baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    lv1Baddie.xPos += xOffsetPixel;
+    lv1Baddie.yPos += yOffsetPixel;
+    lv1Baddie.xStart += xOffsetPixel;
+    lv1Baddie.yStart += yOffsetPixel;
+    lv1Baddie.eSprite = SPR_addSprite(&lv1BdS, lv1Baddie.xStart, lv1Baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+
     updateHud();
 };
 void playGame(){
@@ -170,22 +160,29 @@ void playGame(){
                 flip = FALSE;
             }
             handleInput();
-            SPR_setPosition(baddie.eSprite, baddie.xPos, baddie.yPos);
-            SPR_setHFlip(baddie.eSprite, baddie.facingLeft);
+            SPR_setPosition(lv1Baddie.eSprite, lv1Baddie.xPos, lv1Baddie.yPos);
+            SPR_setHFlip(lv1Baddie.eSprite, lv1Baddie.facingLeft);
             SPR_setPosition(willy.pSprite,willy.x,willy.y); 
             SPR_setHFlip(willy.pSprite, flip);
             SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
             SPR_update();//19-7-23 maybe move this to main loop
         }
         if (counter % 4 == 0){
-            baddie.xPos += baddie.moveIncrement;
-            if (baddie.xPos - 16 >= baddie.xEnd || baddie.xPos <= baddie.xStart){
-                baddie.moveIncrement = baddie.moveIncrement * - 1;
-                baddie.facingLeft = !baddie.facingLeft;
+            lv1Baddie.xPos += lv1Baddie.moveIncrement;
+            if (lv1Baddie.xPos - 16 >= lv1Baddie.xEnd || lv1Baddie.xPos <= lv1Baddie.xStart){
+                lv1Baddie.moveIncrement = lv1Baddie.moveIncrement * - 1;
+                lv1Baddie.facingLeft = !lv1Baddie.facingLeft;
             }
             counter = 0;
         }
-
+        //this was just to check collision maps array
+        char ch[1] = "0"; 
+        for (u8 j = 0; j < yLvTileHeight; j++){
+            for (u8 i = 0; i < xLvTileWidth; i++ ){
+                sprintf(ch, "%d", allCms[(lvNumber * tilesPerLevel) + (i + xLvTileWidth*j)]); //oh god this is nasty
+                VDP_drawText(ch, xOffset + i, yOffset + j );
+            }
+        }
         counter ++;
         SYS_doVBlankProcess();
     }
@@ -231,7 +228,13 @@ void handleInput(){
             willy.pJumpOrFall = JUMPING;
         }
         else if (value & BUTTON_C){
-            gameState = DEATH;
+            lvNumber += 1;
+            if (lvNumber > 19){
+                lvNumber = 0;
+            }
+            drawHud();
+            loadLevel();
+            SYS_doVBlankProcess();
         }
     }
     else if (willy.pJumpOrFall == FALL){

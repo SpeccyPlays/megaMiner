@@ -3,4 +3,6 @@
 #include <genesis.h>
 #include <resources.h>
 
+enum state {INTRO = 0, PLAY = 1, DEATH = 2};
+
 #endif

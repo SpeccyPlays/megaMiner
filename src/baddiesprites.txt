@@ -1,4 +1,5 @@
 Sprite resource, xStart, xEnd, yStart, YEnd
+//-15 from xEnd when adding to .h file;
 lv1BdS, 64, 135, 56, 56
 
 lv2BdS, 97, 247, 104, 104
