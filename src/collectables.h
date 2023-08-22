@@ -5,13 +5,14 @@
 
 typedef struct {
     u16 x;
-    u16 y
+    u16 y;
 } CoOrds;
 typedef struct {
+    u8 numOfKeys;
     Sprite *keySprite;
-    CoOrds xy;
-} key;
+    CoOrds xy[];
+} Keys;
 
-
+Keys lv1Keys = {2, &key, {{.x =240, .y = 48}, {.x = 72, .y=0 }}};
 
 #endif

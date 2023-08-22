@@ -10,6 +10,7 @@
 #include "mainplayer.h"
 #include "baddie.h"
 #include "collisionMaps.h"
+#include "collectables.h"
 
 //screen positioning
 const u8 xOffset = 4; //offsets are in number of 8x8 tiles
@@ -26,10 +27,11 @@ u16 xRightStop = 267;//19-07-23 don't think I'm using this now
 //used for keeping track of what tiles are loaded in VRAM
 u16 ind = TILE_USERINDEX;
 u16 baseInd = TILE_USERINDEX;
-
+//sprite stuff
 Player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 100};//change x and y so don't include offset ?
 Sprite *boot = NULL;
 Enemy lv1Baddie = {&lv1BdS, 64, 135, 56, 56, 64, 56, 1, FALSE};
+
 //game stuff
 enum state gameState = INTRO;
 //first [] is y, second x
@@ -75,7 +77,7 @@ u8 collideDown(u16 x, u16 y);
 u8 collideUp(u16 x, u16 y);
 u8 collideLeft(u16 x, u16 y);
 u8 collideRight(u16 x, u16 y);
-u8 objectChecking(u8 objectToCheck);
+u8 checkCollisionMap(u8 x, u8 y);
 
 int main()
 {
@@ -174,13 +176,13 @@ void playGame(){
             counter = 0;
         }
         //this was just to check collision maps array
-        char ch[1] = "0"; 
+        /*char ch[1] = "0"; 
         for (u8 j = 0; j < yLvTileHeight; j++){
             for (u8 i = 0; i < xLvTileWidth; i++ ){
                 sprintf(ch, "%d", allCms[(lvNumber * tilesPerLevel) + (i + xLvTileWidth*j)]); //oh god this is nasty
                 VDP_drawText(ch, xOffset + i, yOffset + j );
             }
-        }
+        }*/
         counter ++;
         SYS_doVBlankProcess();
     }
@@ -204,7 +206,8 @@ void showDeathSequence(){
 };
 void handleInput(){
     //In the original you can't change direction of the jump or when falling
-    //so only check the controls when player is doing neithr
+    //so only check the controls when player is doing neither
+    //if you walk off a platform then player should fall and lock controls out
     if (willy.pJumpOrFall == NOTHING){
         u16 value = JOY_readJoypad(JOY_1);
         if (value & BUTTON_RIGHT){
@@ -236,6 +239,7 @@ void handleInput(){
         }
     }
     else if (willy.pJumpOrFall == FALL){
+        //this covers walking off the edge of a plaform
         pFalling();
     }
     else if (willy.pJumpOrFall == JUMPING || willy.pJumpOrFall == FALLING){
@@ -308,9 +312,15 @@ u8 collideDown(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - (xOffset * 8));
     u8 x2 = convertPixelValueToTile(x + 14 - (xOffset * 8));
     u8 y1 = convertPixelValueToTile(y + 16 - (yOffset * 8));
-    u8 tileL = levelMap[y1 + 1][x1];
-    u8 tileR = levelMap[y1 + 1][x2];
-    if (tileL != 8 || tileR != 8){
+    //u8 tileL = levelMap[y1 + 1][x1];
+    //u8 tileR = levelMap[y1 + 1][x2];
+    u8 tileL = checkCollisionMap(x1, y1 + 1);
+    u8 tileR = checkCollisionMap(x2, y1 + 1);
+    
+    if (tileL != 0 || tileR != 0){
+        char ch[1] = "0"; 
+        sprintf(ch, "%d", tileL);
+        VDP_drawText(ch, xOffset + 2, yOffset + 4 );
         VDP_drawText("Collision down", xOffset + 1, yOffset + 2);
         return 1;
     }
@@ -364,6 +374,6 @@ u8 collideRight(u16 x, u16 y){
         return 0;
     }
 }
-u8 objectChecking(u8 objectToCheck){
-    return 0;
+u8 checkCollisionMap(u8 x, u8 y){
+    return allCms[(lvNumber * tilesPerLevel) + (x + xLvTileWidth*y)];
 }
