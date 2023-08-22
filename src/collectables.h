@@ -13,6 +13,6 @@ typedef struct {
     CoOrds xy[];
 } Keys;
 
-Keys lv1Keys = {2, &key, {{.x =240, .y = 48}, {.x = 72, .y=0 }}};
+    Keys lv1Keys = {5, NULL, {{.x =240, .y = 48}, {.x = 72, .y=0 }, {.x = 128, .y = 8}, {.x = 192, .y = 32}, {.x = 232, .y = 0}}};
 
 #endif
