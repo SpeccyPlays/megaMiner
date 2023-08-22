@@ -4,13 +4,14 @@
 #include <resources.h>
 
 //16 tiles level item key
-//0 = nothing
-//1 = normal floor
-//2 = drop floor
-//3 = belt
-//4 = brick
-//5 = something that will kill willy
-//6 = gate
+#define NOTILE 0
+#define FLOOR 1
+#define DFLOOR 2
+#define BELT 3
+#define BRICK 4
+#define KILLER 5
+#define ENDGATE 6
+
 //this is nasty having collision maps for all levels in one array
 //it does make switching between them really easy
 const u8 allCms[] = 

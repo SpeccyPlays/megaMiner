@@ -71,7 +71,7 @@ void pMoveLeft();
 void pMoveRight();
 void pJumping();
 void pFalling();
-u16 convertPixelValueToTile(u16 value);
+u8 convertPixelValueToTile(u16 value);
 void pCollisions(u16 x, u16 y);
 u8 collideDown(u16 x, u16 y);
 u8 collideUp(u16 x, u16 y);
@@ -132,6 +132,7 @@ void updateHud(){
     VDP_drawText("Score", 21 + xOffset, 18 + yOffset);
 }
 void loadLevel(){
+    SPR_init(0, 0, 0);
     VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
@@ -166,6 +167,12 @@ void playGame(){
             SPR_setHFlip(willy.pSprite, flip);
             SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
             SPR_update();//19-7-23 maybe move this to main loop
+            //below for debugging - showing willys x/y sprite values
+            char ch[3] = "0";
+            sprintf(ch, "%d", willy.x - (xOffset * 8));
+            VDP_drawText(ch, xOffset + 2, yOffset);
+            sprintf(ch, "%d", willy.y - (yOffset * 8));
+            VDP_drawText(ch, xOffset + 6, yOffset);
         }
         if (counter % 4 == 0){
             lv1Baddie.xPos += lv1Baddie.moveIncrement;
@@ -175,19 +182,15 @@ void playGame(){
             }
             counter = 0;
         }
-        //this was just to check collision maps array
-        /*char ch[1] = "0"; 
-        for (u8 j = 0; j < yLvTileHeight; j++){
-            for (u8 i = 0; i < xLvTileWidth; i++ ){
-                sprintf(ch, "%d", allCms[(lvNumber * tilesPerLevel) + (i + xLvTileWidth*j)]); //oh god this is nasty
-                VDP_drawText(ch, xOffset + i, yOffset + j );
-            }
-        }*/
         counter ++;
         SYS_doVBlankProcess();
     }
     SPR_clear();
     VDP_clearSprites();
+    //below for clearing collision debugging display
+    VDP_drawText("                      ", xOffset + 2, yOffset); 
+    VDP_drawText("                      ", xOffset + 2, yOffset + 2);
+    VDP_drawText("                      ", xOffset + 4, yOffset + 2);
 };
 void showDeathSequence(){
     SPR_init(0, 0, 0);
@@ -300,8 +303,8 @@ void handlePlayAnim(){
         willy.currentSpriteNum = 0;
     }
 };
-u16 convertPixelValueToTile(u16 value){
-    return value >> 3; //divide by by 8
+u8 convertPixelValueToTile(u16 value){
+    return value / 8; //divide by by 8
 };
 void pCollisions(u16 x, u16 y){
     if (collideLeft(x, y) || collideRight(x, y)){
@@ -311,47 +314,57 @@ void pCollisions(u16 x, u16 y){
 u8 collideDown(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - (xOffset * 8));
     u8 x2 = convertPixelValueToTile(x + 14 - (xOffset * 8));
-    u8 y1 = convertPixelValueToTile(y + 16 - (yOffset * 8));
-    //u8 tileL = levelMap[y1 + 1][x1];
-    //u8 tileR = levelMap[y1 + 1][x2];
-    u8 tileL = checkCollisionMap(x1, y1 + 1);
-    u8 tileR = checkCollisionMap(x2, y1 + 1);
+    u8 y1 = convertPixelValueToTile((y + 16) -(yOffset * 8) );
+    u8 tileL = checkCollisionMap(x1, y1);
+    u8 tileR = checkCollisionMap(x2, y1);
+
+    /*char ch[3] = "000"; 
+    sprintf(ch, "%d", x1);
+    VDP_drawText(ch, xOffset + 2, yOffset + 3 );
+    sprintf(ch, "%d", y1);
+    VDP_drawText(ch, xOffset + 4, yOffset + 3 );
+    sprintf(ch, "%d", tileL);
+    VDP_drawText(ch, xOffset + 2, yOffset + 4 );
+    sprintf(ch, "%d", tileR);
+    VDP_drawText(ch, xOffset + 4, yOffset + 4 );*/
     
-    if (tileL != 0 || tileR != 0){
-        char ch[1] = "0"; 
-        sprintf(ch, "%d", tileL);
-        VDP_drawText(ch, xOffset + 2, yOffset + 4 );
-        VDP_drawText("Collision down", xOffset + 1, yOffset + 2);
+    if (tileL != NOTILE || tileR != NOTILE){
         return 1;
     }
     else{
-        VDP_drawText("                 ", xOffset + 1, yOffset + 2);
         return 0;
     }
 };
 u8 collideUp(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
     u8 x2 = convertPixelValueToTile(x + 14 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
-    u8 tileL = levelMap[y1 - 1][x1];
-    u8 tileR = levelMap[y1 - 1][x2];
-    if (tileL == 1 || tileR == 1){
-        VDP_drawText("Collision up", xOffset + 1, yOffset + 2);
+    u8 y1 = convertPixelValueToTile(y + 0 - yOffset * 8);
+    u8 tileL = checkCollisionMap(x1, y1);
+    u8 tileR = checkCollisionMap(x2, y1);
+    /*u8 tileL = levelMap[y1 - 1][x1];
+    u8 tileR = levelMap[y1 - 1][x2];*/
+    /*char ch[3] = "000"; 
+    sprintf(ch, "%d", x1);
+    VDP_drawText(ch, xOffset + 2, yOffset + 3 );
+    sprintf(ch, "%d", y1);
+    VDP_drawText(ch, xOffset + 4, yOffset + 3 );
+    sprintf(ch, "%d", tileL);
+    VDP_drawText(ch, xOffset + 2, yOffset + 4 );
+    sprintf(ch, "%d", tileR);
+    VDP_drawText(ch, xOffset + 4, yOffset + 4 );*/
+    if (tileL == BRICK || tileR == BRICK){
         return 1;
     }
     else{
-        VDP_drawText("                ", xOffset + 1, yOffset + 2);
         return 0;
     }
 };
 u8 collideLeft(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 14 - yOffset * 8);
-    //u8 tileT = levelMap[y1][x1];
-    u8 tileB = levelMap[y1][x1];
-    if (tileB == 1){
-        //VDP_drawText("Collision LEFT", xOffset + 1, yOffset + 2);
-        willy.x += 2;
+    u8 y1 = convertPixelValueToTile(y + 8 - yOffset * 8);
+    u8 tileB = checkCollisionMap(x1, y1);
+    if (tileB == BRICK){
+        willy.x += 1;
         return 1;
     }
     else{
@@ -361,12 +374,12 @@ u8 collideLeft(u16 x, u16 y){
 };
 u8 collideRight(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 14 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 16 - yOffset * 8);
+    u8 y1 = convertPixelValueToTile(y + 8 - yOffset * 8);
     //u8 tileT = levelMap[y1][x1];
-    u8 tileB = levelMap[y1][x1];
-    if (tileB == 1){
+    u8 tileB = checkCollisionMap(x1, y1);
+    if (tileB == BRICK){
         //VDP_drawText("Collision RIGHT", xOffset + 1, yOffset + 2);
-        willy.x -=2;
+        willy.x -=1;
         return 1;
     }
     else{
@@ -375,5 +388,6 @@ u8 collideRight(u16 x, u16 y){
     }
 }
 u8 checkCollisionMap(u8 x, u8 y){
-    return allCms[(lvNumber * tilesPerLevel) + (x + xLvTileWidth*y)];
+    u8 ret = allCms[(lvNumber * tilesPerLevel) + (x + xLvTileWidth*y)];
+    return ret;
 }
