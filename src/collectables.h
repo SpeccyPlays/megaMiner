@@ -34,8 +34,8 @@ Keys lv18Keys = {1, NULL, {{.x=128,.y=8}}};
 Keys lv19Keys = {2, NULL, {{.x=8,.y=40}, {.x=240,.y=8}}};
 Keys lv20Keys = {5, NULL, {{.x=80,.y=88}, {.x=112,.y=88}, {.x=152,.y=88}, {.x=184,.y=40}, {.x=240,.y=48}}};
 
-Keys *allLvKeys[] = {&lv1Keys, &lv2Keys, &lv3Keys, &lv4Keys, &lv5Keys, &lv6Keys, &lv7Keys, &lv8Keys, &lv9Keys
-                    &lv10Keys, &lv11Keys, &lv12Keys, &lv13Keys, &lv14Keys, &lv15Keys, &lv16Keys, &lv17Keys, 
+Keys *allLvKeys[] = {&lv1Keys, &lv2Keys, &lv3Keys, &lv4Keys, &lv5Keys, &lv6Keys, &lv7Keys, &lv8Keys, &lv9Keys,
+&lv10Keys, &lv11Keys, &lv12Keys, &lv13Keys, &lv14Keys, &lv15Keys, &lv16Keys, &lv17Keys, 
                     &lv18Keys, &lv19Keys, &lv20Keys};
 
 
