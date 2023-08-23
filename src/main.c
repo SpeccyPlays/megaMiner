@@ -123,7 +123,7 @@ void loadLevel(){
     lv1Baddie.eSprite = SPR_addSprite(&lv1BdS, lv1Baddie.xStart, lv1Baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     */
     
-    for (u8 i = 0; i < lv1Keys.numOfKeys; i++){
+    for (u8 i = 0; i <  ; i++){
         allLvKeys[lvNumber]->keySprite = SPR_addSprite(&key, allLvKeys[lvNumber]->xy[i].x + xOffsetPixel, allLvKeys[lvNumber]->xy[i].y + yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     }
     updateHud();
