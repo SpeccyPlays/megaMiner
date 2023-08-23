@@ -115,18 +115,17 @@ void loadLevel(){
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    //baddie.eSprite = SPR_addSprite(&lv1BdS, baddie.xStart, baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    /*baddie.eSprite = SPR_addSprite(&lv1BdS, baddie.xStart, baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     lv1Baddie.xPos += xOffsetPixel;
     lv1Baddie.yPos += yOffsetPixel;
     lv1Baddie.xStart += xOffsetPixel;
     lv1Baddie.yStart += yOffsetPixel;
     lv1Baddie.eSprite = SPR_addSprite(&lv1BdS, lv1Baddie.xStart, lv1Baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    
+    */
     
     for (u8 i = 0; i < lv1Keys.numOfKeys; i++){
-        lv1Keys.keySprite = SPR_addSprite(&key, lv1Keys.xy[i].x + (8 * xOffset), lv1Keys.xy[i].y + (yOffset * 8), TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+        allLvKeys[lvNumber]->keySprite = SPR_addSprite(&key, allLvKeys[lvNumber]->xy[i].x + xOffsetPixel, allLvKeys[lvNumber]->xy[i].y + yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     }
-    
     updateHud();
 };
 void playGame(){
@@ -144,27 +143,29 @@ void playGame(){
                 flip = FALSE;
             }
             handleInput();
-            SPR_setPosition(lv1Baddie.eSprite, lv1Baddie.xPos, lv1Baddie.yPos);
-            SPR_setHFlip(lv1Baddie.eSprite, lv1Baddie.facingLeft);
+            //23/8/23 removed below while testing key loading for each level
+            //SPR_setPosition(lv1Baddie.eSprite, lv1Baddie.xPos, lv1Baddie.yPos);
+            //SPR_setHFlip(lv1Baddie.eSprite, lv1Baddie.facingLeft);
             SPR_setPosition(willy.pSprite,willy.x,willy.y); 
             SPR_setHFlip(willy.pSprite, flip);
             SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
-            SPR_update();//19-7-23 maybe move this to main loop
+            SPR_update();
             //below for debugging - showing willys x/y sprite values
             char ch[3] = "0";
-            sprintf(ch, "%d", willy.x - (xOffset * 8));
+            sprintf(ch, "%d", willy.x - xOffsetPixel);
             VDP_drawText(ch, xOffset + 2, yOffset);
-            sprintf(ch, "%d", willy.y - (yOffset * 8));
+            sprintf(ch, "%d", willy.y - yOffsetPixel);
             VDP_drawText(ch, xOffset + 6, yOffset);
         }
-        if (counter % 4 == 0){
+        //23/8/23 removed below while testing key loading for each level
+        /*if (counter % 4 == 0){
             lv1Baddie.xPos += lv1Baddie.moveIncrement;
             if (lv1Baddie.xPos - 16 >= lv1Baddie.xEnd || lv1Baddie.xPos <= lv1Baddie.xStart){
                 lv1Baddie.moveIncrement = lv1Baddie.moveIncrement * - 1;
                 lv1Baddie.facingLeft = !lv1Baddie.facingLeft;
             }
             counter = 0;
-        }
+        }*/
         counter ++;
         SYS_doVBlankProcess();
     }
@@ -295,9 +296,9 @@ void pCollisions(u16 x, u16 y){
     }
 }
 u8 collideDown(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 3 - (xOffset * 8));
-    u8 x2 = convertPixelValueToTile(x + 14 - (xOffset * 8));
-    u8 y1 = convertPixelValueToTile((y + 16) -(yOffset * 8) );
+    u8 x1 = convertPixelValueToTile(x + 3 - xOffsetPixel);
+    u8 x2 = convertPixelValueToTile(x + 14 - xOffsetPixel);
+    u8 y1 = convertPixelValueToTile((y + 16) - yOffsetPixel);
     u8 tileL = checkCollisionMap(x1, y1);
     u8 tileR = checkCollisionMap(x2, y1);
 
@@ -319,9 +320,9 @@ u8 collideDown(u16 x, u16 y){
     }
 };
 u8 collideUp(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
-    u8 x2 = convertPixelValueToTile(x + 14 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 0 - yOffset * 8);
+    u8 x1 = convertPixelValueToTile(x + 3 - xOffsetPixel);
+    u8 x2 = convertPixelValueToTile(x + 14 - xOffsetPixel);
+    u8 y1 = convertPixelValueToTile(y + 0 - yOffsetPixel);
     u8 tileL = checkCollisionMap(x1, y1);
     u8 tileR = checkCollisionMap(x2, y1);
     /*u8 tileL = levelMap[y1 - 1][x1];
@@ -343,8 +344,8 @@ u8 collideUp(u16 x, u16 y){
     }
 };
 u8 collideLeft(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 3 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 8 - yOffset * 8);
+    u8 x1 = convertPixelValueToTile(x + 3 - xOffsetPixel);
+    u8 y1 = convertPixelValueToTile(y + 8 - yOffsetPixel);
     u8 tileB = checkCollisionMap(x1, y1);
     if (tileB == BRICK){
         willy.x += 1;
@@ -356,8 +357,8 @@ u8 collideLeft(u16 x, u16 y){
     }
 };
 u8 collideRight(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 14 - xOffset * 8);
-    u8 y1 = convertPixelValueToTile(y + 8 - yOffset * 8);
+    u8 x1 = convertPixelValueToTile(x + 14 - xOffsetPixel);
+    u8 y1 = convertPixelValueToTile(y + 8 - yOffsetPixel);
     //u8 tileT = levelMap[y1][x1];
     u8 tileB = checkCollisionMap(x1, y1);
     if (tileB == BRICK){
