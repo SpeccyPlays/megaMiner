@@ -41,6 +41,8 @@ void playIntro();
 void drawHud();
 void updateHud();
 void loadLevel();
+void loadBaddies();
+void loadKeys();
 void playGame();
 void showDeathSequence();
 void handleInput();
@@ -76,7 +78,6 @@ int main()
         }
     }
     return(0);
-    
 }
 void playIntro(){
     ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
@@ -115,26 +116,29 @@ void loadLevel(){
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    loadBaddies();
+    loadKeys();
+    updateHud();
+};
+void loadBaddies(){
+    //loop through the baddie array for the level we're on
+    //add the screen offset for any values that need it
+    //set the starting positions
+    //add the sprites
     for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
         allLvBaddies[lvNumber]->Baddies[i].xStart += xOffsetPixel;
         allLvBaddies[lvNumber]->Baddies[i].xEnd += xOffsetPixel;
         allLvBaddies[lvNumber]->Baddies[i].yStart += yOffsetPixel;
         allLvBaddies[lvNumber]->Baddies[i].yEnd += yOffsetPixel;
-        allLvBaddies[lvNumber]->Baddies[i].xPos = allLvBaddies[lvNumber]->Baddies[i].xStart;
+        allLvBaddies[lvNumber]->Baddies[i].xPos = allLvBaddies[lvNumber]->Baddies[i].xEnd;
         allLvBaddies[lvNumber]->Baddies[i].yPos = allLvBaddies[lvNumber]->Baddies[i].yStart;
-        allLvBaddies[lvNumber]->Baddies[i].eSprite = SPR_addSprite(allLvBaddies[lvNumber]->Baddies[i].bdSpriteDef, allLvBaddies[lvNumber]->Baddies[i].xStart, allLvBaddies[lvNumber]->Baddies[i].yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-
+        allLvBaddies[lvNumber]->Baddies[i].eSprite = SPR_addSprite(allLvBaddies[lvNumber]->Baddies[i].bdSpriteDef, allLvBaddies[lvNumber]->Baddies[i].xPos, allLvBaddies[lvNumber]->Baddies[i].yPos, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     }
-    /*lv1Baddie.xPos += xOffsetPixel;
-    lv1Baddie.yPos += yOffsetPixel;
-    lv1Baddie.xStart += xOffsetPixel;
-    lv1Baddie.yStart += yOffsetPixel;
-    lv1Baddie.eSprite = SPR_addSprite(&lv1BdS, lv1Baddie.xStart, lv1Baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    */ 
+};
+void loadKeys(){
     for (u8 i = 0; i < allLvKeys[lvNumber]->numOfKeys; i++){
         allLvKeys[lvNumber]->keySprite = SPR_addSprite(allLvKeys[lvNumber]->kSpriteDef, allLvKeys[lvNumber]->xy[i].x + xOffsetPixel, allLvKeys[lvNumber]->xy[i].y + yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     }
-    updateHud();
 };
 void playGame(){
     loadLevel();

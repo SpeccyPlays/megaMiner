@@ -1,10 +1,11 @@
 Sprite resource, xStart, xEnd, yStart, YEnd
 //-15 from xEnd when adding to .h file;
-lv1BdS, 64, 135, 56, 56
+lv1BdS, 64, 120, 56, 56
 
-lv2BdS, 97, 247, 104, 104
-lv2BdS, 8, 159, 24, 24
+lv2BdS, 97, 232, 104, 104
+lv2BdS, 8, 144, 24, 24
 
+//-15 from xEnd when adding to .h file; from this point on
 lv3BdS, 8, 167 , 104, 104
 lv3BdS, 8, 143, 24, 24
 lv3BdS, 144, 247, 24, 24
@@ -28,7 +29,7 @@ lv7BdS, 136, 247, 104, 104
 lv8BdS, 8, 87, 104, 104
 lv8BdS, 88, 135, 88, 88
 lv8BdS, 144, 183, 56, 56
-lv8BdS2 120,0
+lv8BdS2 120, 120, 0, 0
 
 lv9BdS, 96, 159 , 80, 80
 lv9BdS, 96, 159 , 24, 24
