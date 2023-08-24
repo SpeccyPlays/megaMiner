@@ -80,6 +80,7 @@ IMAGE   deathScreen         "tiles/deathScreen.png" BEST ALL
 SPRITE  deathBoot           "tiles/deathBoot-sheet.png" 2 16 FAST 8
 
 SPRITE  key                 "tiles/keySprites/key-sheet.png" 1 1 FAST 1
+SPRITE  kbat                 "tiles/keySprites/bat-sheet.png" 1 1 FAST 1
 SPRITE  kbanana             "tiles/keySprites/banana-Sheet.png" 1 1 FAST 1
 SPRITE  kbauble             "tiles/keySprites/bauble-Sheet.png" 1 1 FAST 1
 SPRITE  kbox                "tiles/keySprites/box-Sheet.png" 1 1 FAST 1

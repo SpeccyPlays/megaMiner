@@ -30,7 +30,7 @@ u16 baseInd = TILE_USERINDEX;
 //sprite stuff
 Player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 100};//change x and y so don't include offset ?
 Sprite *boot = NULL;
-Enemy lv1Baddie = {&lv1BdS, 64, 135, 56, 56, 64, 56, 1, FALSE};
+//Enemy lv1Baddie = {&lv1BdS, 64, 135, 56, 56, 64, 56, 1, FALSE};
 
 //game stuff
 enum state gameState = INTRO;
@@ -115,15 +115,24 @@ void loadLevel(){
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
     willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    /*baddie.eSprite = SPR_addSprite(&lv1BdS, baddie.xStart, baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    lv1Baddie.xPos += xOffsetPixel;
+    for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
+        allLvBaddies[lvNumber]->Baddies[i].xStart += xOffsetPixel;
+        allLvBaddies[lvNumber]->Baddies[i].xEnd += xOffsetPixel;
+        allLvBaddies[lvNumber]->Baddies[i].yStart += yOffsetPixel;
+        allLvBaddies[lvNumber]->Baddies[i].yEnd += yOffsetPixel;
+        allLvBaddies[lvNumber]->Baddies[i].xPos = allLvBaddies[lvNumber]->Baddies[i].xStart;
+        allLvBaddies[lvNumber]->Baddies[i].yPos = allLvBaddies[lvNumber]->Baddies[i].yStart;
+        allLvBaddies[lvNumber]->Baddies[i].eSprite = SPR_addSprite(allLvBaddies[lvNumber]->Baddies[i].bdSpriteDef, allLvBaddies[lvNumber]->Baddies[i].xStart, allLvBaddies[lvNumber]->Baddies[i].yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+
+    }
+    /*lv1Baddie.xPos += xOffsetPixel;
     lv1Baddie.yPos += yOffsetPixel;
     lv1Baddie.xStart += xOffsetPixel;
     lv1Baddie.yStart += yOffsetPixel;
     lv1Baddie.eSprite = SPR_addSprite(&lv1BdS, lv1Baddie.xStart, lv1Baddie.yStart, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    */
+    */ 
     for (u8 i = 0; i < allLvKeys[lvNumber]->numOfKeys; i++){
-        allLvKeys[lvNumber]->keySprite = SPR_addSprite(&key, allLvKeys[lvNumber]->xy[i].x + xOffsetPixel, allLvKeys[lvNumber]->xy[i].y + yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+        allLvKeys[lvNumber]->keySprite = SPR_addSprite(allLvKeys[lvNumber]->kSpriteDef, allLvKeys[lvNumber]->xy[i].x + xOffsetPixel, allLvKeys[lvNumber]->xy[i].y + yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     }
     updateHud();
 };
@@ -219,6 +228,8 @@ void handleInput(){
             if (lvNumber > 19){
                 lvNumber = 0;
             }
+            SPR_clear();
+            VDP_clearSprites();
             drawHud();
             loadLevel();
             SYS_doVBlankProcess();

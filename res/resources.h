@@ -36,6 +36,7 @@ extern const SpriteDefinition lv20BdS;
 extern const SpriteDefinition lv20BdS2;
 extern const SpriteDefinition deathBoot;
 extern const SpriteDefinition key;
+extern const SpriteDefinition kbat;
 extern const SpriteDefinition kbanana;
 extern const SpriteDefinition kbauble;
 extern const SpriteDefinition kbox;
