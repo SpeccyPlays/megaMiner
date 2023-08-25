@@ -35,8 +35,10 @@ Sprite *boot = NULL;
 //game stuff
 enum state gameState = INTRO;
 u8 lvNumber = 0;
+u8 numOfLvs = 20;
 //level sprites
 //declarations
+void applyOffsets();
 void playIntro();
 void drawHud();
 void updateHud();
@@ -44,6 +46,7 @@ void loadLevel();
 void loadBaddies();
 void loadKeys();
 void playGame();
+void moveBaddies();
 void showDeathSequence();
 void handleInput();
 void handlePlayAnim();
@@ -61,8 +64,7 @@ u8 checkCollisionMap(u8 x, u8 y);
 
 int main()
 {
-    xOffsetPixel = xOffset * 8;
-    yOffsetPixel = yOffset * 8;
+    applyOffsets();
     SPR_init(0, 0, 0); //start sprite engine
     while(1){
         switch (gameState){
@@ -78,6 +80,28 @@ int main()
         }
     }
     return(0);
+}
+void applyOffsets(){
+    /*
+    Due to the fact the zx spectrum had a smaller screen than the Megadrive
+    We need to have offsets to center the screen
+    All sprites need this offset applied so better to do once here
+    then we don't need to worry about it again
+    */
+    xOffsetPixel = xOffset * 8;
+    yOffsetPixel = yOffset * 8;
+    for (u8 lv =0; lv < numOfLvs; lv ++){
+        for (u8 i = 0; i < allLvBaddies[lv]->numOfBaddies; i++){
+            allLvBaddies[lv]->Baddies[i].xStart += xOffsetPixel;
+            allLvBaddies[lv]->Baddies[i].xEnd += xOffsetPixel;
+            allLvBaddies[lv]->Baddies[i].yStart += yOffsetPixel;
+            allLvBaddies[lv]->Baddies[i].yEnd += yOffsetPixel;
+        }
+        for (u8 i = 0; i < allLvKeys[lv]->numOfKeys; i++){
+            allLvKeys[lv]->tKeys[i].xy.x += xOffsetPixel;
+            allLvKeys[lv]->tKeys[i].xy.y += yOffsetPixel;
+        }
+    }
 }
 void playIntro(){
     ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
@@ -121,23 +145,21 @@ void loadLevel(){
     updateHud();
 };
 void loadBaddies(){
-    //loop through the baddie array for the level we're on
-    //add the screen offset for any values that need it
-    //set the starting positions
-    //add the sprites
+    /*
+    Does what it says on the tin. Loads baddies for the level we're on
+    */
     for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
-        allLvBaddies[lvNumber]->Baddies[i].xStart += xOffsetPixel;
-        allLvBaddies[lvNumber]->Baddies[i].xEnd += xOffsetPixel;
-        allLvBaddies[lvNumber]->Baddies[i].yStart += yOffsetPixel;
-        allLvBaddies[lvNumber]->Baddies[i].yEnd += yOffsetPixel;
         allLvBaddies[lvNumber]->Baddies[i].xPos = allLvBaddies[lvNumber]->Baddies[i].xEnd;
         allLvBaddies[lvNumber]->Baddies[i].yPos = allLvBaddies[lvNumber]->Baddies[i].yStart;
         allLvBaddies[lvNumber]->Baddies[i].eSprite = SPR_addSprite(allLvBaddies[lvNumber]->Baddies[i].bdSpriteDef, allLvBaddies[lvNumber]->Baddies[i].xPos, allLvBaddies[lvNumber]->Baddies[i].yPos, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     }
 };
 void loadKeys(){
+    /*
+    Does what it says on the tin. Loads keys for the level we're on
+    */
     for (u8 i = 0; i < allLvKeys[lvNumber]->numOfKeys; i++){
-        allLvKeys[lvNumber]->keySprite = SPR_addSprite(allLvKeys[lvNumber]->kSpriteDef, allLvKeys[lvNumber]->xy[i].x + xOffsetPixel, allLvKeys[lvNumber]->xy[i].y + yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+        allLvKeys[lvNumber]->tKeys[i].kSprite = SPR_addSprite(allLvKeys[lvNumber]->tKeys[i].kSpriteDef, allLvKeys[lvNumber]->tKeys[i].xy.x, allLvKeys[lvNumber]->tKeys[i].xy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     }
 };
 void playGame(){
@@ -169,15 +191,10 @@ void playGame(){
             sprintf(ch, "%d", willy.y - yOffsetPixel);
             VDP_drawText(ch, xOffset + 6, yOffset);
         }
-        //23/8/23 removed below while testing key loading for each level
-        /*if (counter % 4 == 0){
-            lv1Baddie.xPos += lv1Baddie.moveIncrement;
-            if (lv1Baddie.xPos - 16 >= lv1Baddie.xEnd || lv1Baddie.xPos <= lv1Baddie.xStart){
-                lv1Baddie.moveIncrement = lv1Baddie.moveIncrement * - 1;
-                lv1Baddie.facingLeft = !lv1Baddie.facingLeft;
-            }
+        if (counter % 4 == 0){
+            moveBaddies();
             counter = 0;
-        }*/
+        }
         counter ++;
         SYS_doVBlankProcess();
     }
@@ -188,6 +205,21 @@ void playGame(){
     VDP_drawText("                      ", xOffset + 2, yOffset + 2);
     VDP_drawText("                      ", xOffset + 4, yOffset + 2);
 };
+void moveBaddies(){
+    /*
+    Check all baddies for this level to see if they're at either end of their patrol
+    If so, change direction and the way the sprite is facing
+    */
+    for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
+        allLvBaddies[lvNumber]->Baddies[i].xPos += allLvBaddies[lvNumber]->Baddies[i].moveIncrement;
+        if (allLvBaddies[lvNumber]->Baddies[i].xPos >= allLvBaddies[lvNumber]->Baddies[i].xEnd || allLvBaddies[lvNumber]->Baddies[i].xPos <= allLvBaddies[lvNumber]->Baddies[i].xStart){
+            allLvBaddies[lvNumber]->Baddies[i].moveIncrement = allLvBaddies[lvNumber]->Baddies[i].moveIncrement * - 1;
+            allLvBaddies[lvNumber]->Baddies[i].facingLeft = !allLvBaddies[lvNumber]->Baddies[i].facingLeft;
+        }
+        SPR_setPosition(allLvBaddies[lvNumber]->Baddies[i].eSprite,allLvBaddies[lvNumber]->Baddies[i].xPos, allLvBaddies[lvNumber]->Baddies[i].yPos);
+        SPR_setHFlip(allLvBaddies[lvNumber]->Baddies[i].eSprite, allLvBaddies[lvNumber]->Baddies[i].facingLeft);
+    }
+}
 void showDeathSequence(){
     SPR_init(0, 0, 0);
     drawHud();
