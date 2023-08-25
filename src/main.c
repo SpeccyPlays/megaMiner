@@ -211,10 +211,19 @@ void moveBaddies(){
     If so, change direction and the way the sprite is facing
     */
     for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
-        allLvBaddies[lvNumber]->Baddies[i].xPos += allLvBaddies[lvNumber]->Baddies[i].moveIncrement;
-        if (allLvBaddies[lvNumber]->Baddies[i].xPos >= allLvBaddies[lvNumber]->Baddies[i].xEnd || allLvBaddies[lvNumber]->Baddies[i].xPos <= allLvBaddies[lvNumber]->Baddies[i].xStart){
-            allLvBaddies[lvNumber]->Baddies[i].moveIncrement = allLvBaddies[lvNumber]->Baddies[i].moveIncrement * - 1;
-            allLvBaddies[lvNumber]->Baddies[i].facingLeft = !allLvBaddies[lvNumber]->Baddies[i].facingLeft;
+        if (!allLvBaddies[lvNumber]->Baddies[i].yMove){
+            allLvBaddies[lvNumber]->Baddies[i].xPos += allLvBaddies[lvNumber]->Baddies[i].moveIncrement;
+            if (allLvBaddies[lvNumber]->Baddies[i].xPos >= allLvBaddies[lvNumber]->Baddies[i].xEnd || allLvBaddies[lvNumber]->Baddies[i].xPos <= allLvBaddies[lvNumber]->Baddies[i].xStart){
+                allLvBaddies[lvNumber]->Baddies[i].moveIncrement = allLvBaddies[lvNumber]->Baddies[i].moveIncrement * - 1;
+                allLvBaddies[lvNumber]->Baddies[i].facingLeft = !allLvBaddies[lvNumber]->Baddies[i].facingLeft;
+            }
+        }
+        else {
+            //line below is just cos I'm starting them at their highest but almost at most right
+            allLvBaddies[lvNumber]->Baddies[i].yPos += allLvBaddies[lvNumber]->Baddies[i].moveIncrement;
+            if (allLvBaddies[lvNumber]->Baddies[i].yPos >= allLvBaddies[lvNumber]->Baddies[i].yEnd || allLvBaddies[lvNumber]->Baddies[i].yPos <= allLvBaddies[lvNumber]->Baddies[i].yStart){
+                allLvBaddies[lvNumber]->Baddies[i].moveIncrement = allLvBaddies[lvNumber]->Baddies[i].moveIncrement * - 1;
+            }
         }
         SPR_setPosition(allLvBaddies[lvNumber]->Baddies[i].eSprite,allLvBaddies[lvNumber]->Baddies[i].xPos, allLvBaddies[lvNumber]->Baddies[i].yPos);
         SPR_setHFlip(allLvBaddies[lvNumber]->Baddies[i].eSprite, allLvBaddies[lvNumber]->Baddies[i].facingLeft);
