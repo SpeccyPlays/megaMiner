@@ -6,7 +6,6 @@
 typedef struct {
     Sprite *eSprite;
     const SpriteDefinition *bdSpriteDef; //from resources.h
-    //sprites usually only move on x axis apart from Eugene so including Y for him
     u16 xStart;
     u16 xEnd;
     u16 yStart;

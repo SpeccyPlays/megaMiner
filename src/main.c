@@ -21,17 +21,11 @@ u8 xLvTileWidth = 32;
 u8 yLvTileHeight = 16;
 u16 tilesPerLevel = 512;
 
-//i = x + width*y; for traversing 1d array as 2d array space
-u16 xLeftStop = 37;//19-07-23 don't think I'm using this now
-u16 xRightStop = 267;//19-07-23 don't think I'm using this now
 //used for keeping track of what tiles are loaded in VRAM
 u16 ind = TILE_USERINDEX;
 u16 baseInd = TILE_USERINDEX;
 //sprite stuff
-Player willy = {NULL, 48, 128, STAND, NOTHING, 0, 8, 0, 18, 0, 100};//change x and y so don't include offset ?
 Sprite *boot = NULL;
-//Enemy lv1Baddie = {&lv1BdS, 64, 135, 56, 56, 64, 56, 1, FALSE};
-
 //game stuff
 enum state gameState = INTRO;
 u8 lvNumber = 0;
@@ -43,10 +37,13 @@ void playIntro();
 void drawHud();
 void updateHud();
 void loadLevel();
+void loadPlayer();
 void loadBaddies();
 void loadKeys();
 void playGame();
 void moveBaddies();
+void baddieCollisionDetect();
+void keyCollisionDetect();
 void showDeathSequence();
 void handleInput();
 void handlePlayAnim();
@@ -103,6 +100,8 @@ void applyOffsets(){
             allLvKeys[lv]->tKeys[i].xy.x += xOffsetPixel;
             allLvKeys[lv]->tKeys[i].xy.y += yOffsetPixel;
         }
+        playerLvStart[lv].x += xOffsetPixel;
+        playerLvStart[lv].y += yOffsetPixel;
     }
 }
 void playIntro(){
@@ -141,11 +140,20 @@ void loadLevel(){
     VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
-    willy.pSprite = SPR_addSprite(&minerWillySprite, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    loadPlayer();
     loadBaddies();
     loadKeys();
     updateHud();
 };
+void loadPlayer(){
+    /*
+    Does what it says on the tin. Loads player
+    */
+   willy.x = playerLvStart[lvNumber].x;
+   willy.y = playerLvStart[lvNumber].y;
+   willy.facingLeft = playerLvStart[lvNumber].facingLeft;
+   willy.pSprite = SPR_addSprite(willy.pSpriteDef, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+}
 void loadBaddies(){
     /*
     Does what it says on the tin. Loads baddies for the level we're on
@@ -167,36 +175,40 @@ void loadKeys(){
 void playGame(){
     loadLevel();
     u8 counter = 0;
-    u16 flip;
     while(gameState == PLAY)
     {
         //using a counter too slow the play down so it's more like the original
         if (counter % 2 == 0){
+            handleInput();
             if (willy.pMovements == WALKLEFT){
-                flip = TRUE;
+                willy.facingLeft = TRUE;
             }
             else if(willy.pMovements == WALKRIGHT){
-                flip = FALSE;
+                willy.facingLeft = FALSE;
             }
-            handleInput();
-            //23/8/23 removed below while testing key loading for each level
-            //SPR_setPosition(lv1Baddie.eSprite, lv1Baddie.xPos, lv1Baddie.yPos);
-            //SPR_setHFlip(lv1Baddie.eSprite, lv1Baddie.facingLeft);
             SPR_setPosition(willy.pSprite,willy.x,willy.y); 
-            SPR_setHFlip(willy.pSprite, flip);
+            SPR_setHFlip(willy.pSprite, willy.facingLeft);
             SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
-            SPR_update();
             //below for debugging - showing willys x/y sprite values
             char ch[3] = "0";
             sprintf(ch, "%d", willy.x - xOffsetPixel);
             VDP_drawText(ch, xOffset + 2, yOffset);
             sprintf(ch, "%d", willy.y - yOffsetPixel);
             VDP_drawText(ch, xOffset + 6, yOffset);
+
+            
         }
+        keyCollisionDetect();
+        baddieCollisionDetect();
         if (counter % 4 == 0){
+            VDP_drawText("                      ", xOffset + 2, yOffset); 
+            VDP_drawText("                      ", xOffset + 2, yOffset + 1);
+            VDP_drawText("                      ", xOffset + 2, yOffset + 2);
+            VDP_drawText("                      ", xOffset + 2, yOffset + 3);
             moveBaddies();
             counter = 0;
         }
+        SPR_update();
         counter ++;
         SYS_doVBlankProcess();
     }
@@ -204,8 +216,8 @@ void playGame(){
     VDP_clearSprites();
     //below for clearing collision debugging display
     VDP_drawText("                      ", xOffset + 2, yOffset); 
+    VDP_drawText("                      ", xOffset + 2, yOffset + 1);
     VDP_drawText("                      ", xOffset + 2, yOffset + 2);
-    VDP_drawText("                      ", xOffset + 4, yOffset + 2);
 };
 void moveBaddies(){
     /*
@@ -230,7 +242,57 @@ void moveBaddies(){
         SPR_setHFlip(allLvBaddies[lvNumber]->Baddies[i].eSprite, allLvBaddies[lvNumber]->Baddies[i].facingLeft);
     }
 }
+void baddieCollisionDetect(){
+    /*
+    Check through baddie positions for current level to see if they hit willy
+    */
+    for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
+        if((willy.x > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
+            (willy.y + 2 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
+            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 3);  
+        }
+        else if ((willy.x + 12 > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + 12 < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
+            (willy.y + 2 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
+            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 3); 
+        }
+        else if((willy.x > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
+            (willy.y + 14 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y + 14 < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
+            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 3);  
+        }
+        else if ((willy.x + 12 > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + 12 < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
+            (willy.y + 14 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y + 14 < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
+            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 3); 
+        }
+    }
+};
+void keyCollisionDetect(){
+    /*
+    Loop through a levels keys to see if willy has hit any
+    */
+
+    for (u8 i = 0; i < allLvKeys[lvNumber]->numOfKeys; i++){
+        if((willy.x + 3 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 3 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
+            (willy.y > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y < allLvKeys[lvNumber]->tKeys[i].xy.y + 8)){
+            VDP_drawText("        key           ", xOffset + 2, yOffset + 3);  
+        }
+        else if ((willy.x + 12 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 12 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
+            (willy.y > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y < allLvKeys[lvNumber]->tKeys[i].xy.y + 8)){
+            VDP_drawText("        key           ", xOffset + 2, yOffset + 3); 
+        }
+        else if((willy.x + 3 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 3 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
+            (willy.y + 14 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y + 14 < allLvKeys[lvNumber]->tKeys[i].xy.y + 8)){
+            VDP_drawText("        key           ", xOffset + 2, yOffset + 3);  
+        }
+        else if ((willy.x + 12 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 12 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
+            (willy.y + 14 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y + 14 < allLvKeys[lvNumber]->tKeys[i].xy.y + 8)){
+            VDP_drawText("        key           ", xOffset + 2, yOffset + 3); 
+        }
+    }
+};
 void showDeathSequence(){
+    /*
+    The squashing boot when willy is out of lives
+    */
     SPR_init(0, 0, 0);
     drawHud();
     VDP_drawImageEx(BG_B, &deathScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
