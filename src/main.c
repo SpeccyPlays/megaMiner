@@ -96,6 +96,8 @@ void applyOffsets(){
             allLvBaddies[lv]->Baddies[i].xEnd += xOffsetPixel;
             allLvBaddies[lv]->Baddies[i].yStart += yOffsetPixel;
             allLvBaddies[lv]->Baddies[i].yEnd += yOffsetPixel;
+            allLvBaddies[lv]->Baddies[i].xLvStart += xOffsetPixel;
+            allLvBaddies[lv]->Baddies[i].yLvStart += yOffsetPixel;
         }
         for (u8 i = 0; i < allLvKeys[lv]->numOfKeys; i++){
             allLvKeys[lv]->tKeys[i].xy.x += xOffsetPixel;
@@ -149,8 +151,8 @@ void loadBaddies(){
     Does what it says on the tin. Loads baddies for the level we're on
     */
     for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
-        allLvBaddies[lvNumber]->Baddies[i].xPos = allLvBaddies[lvNumber]->Baddies[i].xEnd;
-        allLvBaddies[lvNumber]->Baddies[i].yPos = allLvBaddies[lvNumber]->Baddies[i].yStart;
+        allLvBaddies[lvNumber]->Baddies[i].xPos = allLvBaddies[lvNumber]->Baddies[i].xLvStart;
+        allLvBaddies[lvNumber]->Baddies[i].yPos = allLvBaddies[lvNumber]->Baddies[i].yLvStart;
         allLvBaddies[lvNumber]->Baddies[i].eSprite = SPR_addSprite(allLvBaddies[lvNumber]->Baddies[i].bdSpriteDef, allLvBaddies[lvNumber]->Baddies[i].xPos, allLvBaddies[lvNumber]->Baddies[i].yPos, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     }
 };
@@ -219,7 +221,6 @@ void moveBaddies(){
             }
         }
         else {
-            //line below is just cos I'm starting them at their highest but almost at most right
             allLvBaddies[lvNumber]->Baddies[i].yPos += allLvBaddies[lvNumber]->Baddies[i].moveIncrement;
             if (allLvBaddies[lvNumber]->Baddies[i].yPos >= allLvBaddies[lvNumber]->Baddies[i].yEnd || allLvBaddies[lvNumber]->Baddies[i].yPos <= allLvBaddies[lvNumber]->Baddies[i].yStart){
                 allLvBaddies[lvNumber]->Baddies[i].moveIncrement = allLvBaddies[lvNumber]->Baddies[i].moveIncrement * - 1;
