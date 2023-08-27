@@ -218,6 +218,7 @@ void playGame(){
         baddieCollisionDetect();
         ckAmountOfKeysCollected();
         if (counter % 4 == 0){
+            VDP_drawText("                      ", xOffset + 2, yOffset + 2);
             moveBaddies();
             counter = 0;
         }
@@ -335,7 +336,6 @@ void showDeathSequence(){
         SYS_doVBlankProcess();
     }
     SPR_clear();
-    SYS_doVBlankProcess();
     gameState = INTRO;
     VDP_clearSprites();
 };
