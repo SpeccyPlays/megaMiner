@@ -30,6 +30,7 @@ Sprite *boot = NULL;
 enum state gameState = INTRO;
 u8 lvNumber = 0;
 u8 numOfLvs = 20;
+u8 keyCounter = 0;
 //level sprites
 //declarations
 void applyOffsets();
@@ -123,12 +124,18 @@ void playIntro(){
     XGM_stopPlay();
 };
 void drawHud(){
+    /*
+    Draw the score area at the bottom of the screen
+    */
     ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
     VDP_drawImageEx(BG_B, &HUD, TILE_ATTR_FULL(PAL0, TRUE, FALSE, FALSE, ind), 0+xOffset, 16+yOffset, FALSE, TRUE);
     ind += HUD.tileset->numTile;
     VDP_clearTextArea(xOffset, yOffset, 32, 168);
 };
 void updateHud(){
+    /*
+    Add the data to the score area
+    */
     VDP_setPaletteColor(15, RGB8_8_8_TO_VDPCOLOR(255, 255, 255));
     VDP_drawText(levelNames[lvNumber], xOffset, 16 + yOffset);
     VDP_drawText("AIR", 0 + xOffset, 17 + yOffset);
@@ -136,6 +143,10 @@ void updateHud(){
     VDP_drawText("Score", 21 + xOffset, 18 + yOffset);
 }
 void loadLevel(){
+    /*
+    Doesn't need much of an explanation - initilise the sprite engine, draw the level, start the music
+    Load ALL the sprites
+    */
     SPR_init(0, 0, 0);
     VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     XGM_setLoopNumber(-1);
@@ -144,6 +155,7 @@ void loadLevel(){
     loadBaddies();
     loadKeys();
     updateHud();
+    keyCounter = 0;
 };
 void loadPlayer(){
     /*
@@ -167,9 +179,11 @@ void loadBaddies(){
 void loadKeys(){
     /*
     Does what it says on the tin. Loads keys for the level we're on
+    Make sure the option to show them is true
     */
     for (u8 i = 0; i < allLvKeys[lvNumber]->numOfKeys; i++){
         allLvKeys[lvNumber]->tKeys[i].kSprite = SPR_addSprite(allLvKeys[lvNumber]->tKeys[i].kSpriteDef, allLvKeys[lvNumber]->tKeys[i].xy.x, allLvKeys[lvNumber]->tKeys[i].xy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+        allLvKeys[lvNumber]->tKeys[i].kShow = TRUE;
     }
 };
 void playGame(){
@@ -195,16 +209,13 @@ void playGame(){
             VDP_drawText(ch, xOffset + 2, yOffset);
             sprintf(ch, "%d", willy.y - yOffsetPixel);
             VDP_drawText(ch, xOffset + 6, yOffset);
-
-            
+            ch[3] = "0";
+            sprintf(ch, "%d", keyCounter);
+            VDP_drawText(ch, xOffset + 2, yOffset+ 1);
         }
         keyCollisionDetect();
         baddieCollisionDetect();
         if (counter % 4 == 0){
-            VDP_drawText("                      ", xOffset + 2, yOffset); 
-            VDP_drawText("                      ", xOffset + 2, yOffset + 1);
-            VDP_drawText("                      ", xOffset + 2, yOffset + 2);
-            VDP_drawText("                      ", xOffset + 2, yOffset + 3);
             moveBaddies();
             counter = 0;
         }
@@ -267,25 +278,38 @@ void baddieCollisionDetect(){
 };
 void keyCollisionDetect(){
     /*
-    Loop through a levels keys to see if willy has hit any
+    Loop through a levels keys to see if willy has hit any that are still displayed
+    If so, remove sprite from memory and set it to not show anytmore
     */
 
     for (u8 i = 0; i < allLvKeys[lvNumber]->numOfKeys; i++){
         if((willy.x + 3 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 3 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
-            (willy.y > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y < allLvKeys[lvNumber]->tKeys[i].xy.y + 8)){
-            VDP_drawText("        key           ", xOffset + 2, yOffset + 3);  
+            (willy.y + 1 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y < allLvKeys[lvNumber]->tKeys[i].xy.y + 8) &
+            (allLvKeys[lvNumber]->tKeys[i].kShow == TRUE)){
+            allLvKeys[lvNumber]->tKeys[i].kShow = FALSE;
+            keyCounter ++;
+            SPR_releaseSprite(allLvKeys[lvNumber]->tKeys[i].kSprite);
         }
         else if ((willy.x + 12 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 12 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
-            (willy.y > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y < allLvKeys[lvNumber]->tKeys[i].xy.y + 8)){
-            VDP_drawText("        key           ", xOffset + 2, yOffset + 3); 
+            (willy.y + 1> allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y < allLvKeys[lvNumber]->tKeys[i].xy.y + 8) &
+            (allLvKeys[lvNumber]->tKeys[i].kShow == TRUE)){
+            allLvKeys[lvNumber]->tKeys[i].kShow = FALSE;
+            keyCounter ++;
+            SPR_releaseSprite(allLvKeys[lvNumber]->tKeys[i].kSprite);
         }
         else if((willy.x + 3 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 3 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
-            (willy.y + 14 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y + 14 < allLvKeys[lvNumber]->tKeys[i].xy.y + 8)){
-            VDP_drawText("        key           ", xOffset + 2, yOffset + 3);  
+            (willy.y + 14 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y + 14 < allLvKeys[lvNumber]->tKeys[i].xy.y + 8) &
+            (allLvKeys[lvNumber]->tKeys[i].kShow == TRUE)){
+            allLvKeys[lvNumber]->tKeys[i].kShow = FALSE;
+            keyCounter ++;
+            SPR_releaseSprite(allLvKeys[lvNumber]->tKeys[i].kSprite);
         }
         else if ((willy.x + 12 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 12 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
-            (willy.y + 14 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y + 14 < allLvKeys[lvNumber]->tKeys[i].xy.y + 8)){
-            VDP_drawText("        key           ", xOffset + 2, yOffset + 3); 
+            (willy.y + 14 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y + 14 < allLvKeys[lvNumber]->tKeys[i].xy.y + 8) &
+            (allLvKeys[lvNumber]->tKeys[i].kShow == TRUE)){
+            allLvKeys[lvNumber]->tKeys[i].kShow = FALSE;
+            keyCounter ++;
+            SPR_releaseSprite(allLvKeys[lvNumber]->tKeys[i].kSprite); 
         }
     }
 };
@@ -298,7 +322,7 @@ void showDeathSequence(){
     VDP_drawImageEx(BG_B, &deathScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     ind += deathScreen.tileset->numTile;
     boot = SPR_addSprite(&deathBoot, (16 + xOffset) * 8, (yOffset) * 8, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    for (u16 j = 0; j < 180; j++){
+    for (u16 j = 0; j < 90; j++){
         SPR_update();
         SYS_doVBlankProcess();
     }
@@ -308,9 +332,11 @@ void showDeathSequence(){
     VDP_clearSprites();
 };
 void handleInput(){
-    //In the original you can't change direction of the jump or when falling
-    //so only check the controls when player is doing neither
-    //if you walk off a platform then player should fall and lock controls out
+    /*
+    In the original you can't change direction of the jump or when falling
+    so only check the controls when player is doing neither
+    if you walk off a platform then player should fall and lock controls out
+    */
     if (willy.pJumpOrFall == NOTHING){
         u16 value = JOY_readJoypad(JOY_1);
         if (value & BUTTON_RIGHT){
@@ -341,6 +367,10 @@ void handleInput(){
             drawHud();
             loadLevel();
             SYS_doVBlankProcess();
+        }
+        else if (value & BUTTON_A){
+            lvNumber = 0;
+            showDeathSequence();
         }
     }
     else if (willy.pJumpOrFall == FALL){
@@ -406,30 +436,19 @@ void handlePlayAnim(){
     }
 };
 u8 convertPixelValueToTile(u16 value){
-    return value / 8; //divide by by 8
+    return value / 8; 
 };
 void pCollisions(u16 x, u16 y){
     if (collideLeft(x, y) || collideRight(x, y)){
         willy.pMovements = STAND;
     }
-}
+};
 u8 collideDown(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - xOffsetPixel);
     u8 x2 = convertPixelValueToTile(x + 14 - xOffsetPixel);
     u8 y1 = convertPixelValueToTile((y + 16) - yOffsetPixel);
     u8 tileL = checkCollisionMap(x1, y1);
     u8 tileR = checkCollisionMap(x2, y1);
-
-    /*char ch[3] = "000"; 
-    sprintf(ch, "%d", x1);
-    VDP_drawText(ch, xOffset + 2, yOffset + 3 );
-    sprintf(ch, "%d", y1);
-    VDP_drawText(ch, xOffset + 4, yOffset + 3 );
-    sprintf(ch, "%d", tileL);
-    VDP_drawText(ch, xOffset + 2, yOffset + 4 );
-    sprintf(ch, "%d", tileR);
-    VDP_drawText(ch, xOffset + 4, yOffset + 4 );*/
-    
     if (tileL != NOTILE || tileR != NOTILE){
         return 1;
     }
@@ -443,17 +462,6 @@ u8 collideUp(u16 x, u16 y){
     u8 y1 = convertPixelValueToTile(y + 0 - yOffsetPixel);
     u8 tileL = checkCollisionMap(x1, y1);
     u8 tileR = checkCollisionMap(x2, y1);
-    /*u8 tileL = levelMap[y1 - 1][x1];
-    u8 tileR = levelMap[y1 - 1][x2];*/
-    /*char ch[3] = "000"; 
-    sprintf(ch, "%d", x1);
-    VDP_drawText(ch, xOffset + 2, yOffset + 3 );
-    sprintf(ch, "%d", y1);
-    VDP_drawText(ch, xOffset + 4, yOffset + 3 );
-    sprintf(ch, "%d", tileL);
-    VDP_drawText(ch, xOffset + 2, yOffset + 4 );
-    sprintf(ch, "%d", tileR);
-    VDP_drawText(ch, xOffset + 4, yOffset + 4 );*/
     if (tileL == BRICK || tileR == BRICK){
         return 1;
     }
@@ -488,8 +496,8 @@ u8 collideRight(u16 x, u16 y){
         //VDP_drawText("               ", xOffset + 1, yOffset + 2);
         return 0;
     }
-}
+};
 u8 checkCollisionMap(u8 x, u8 y){
     u8 ret = allCms[(lvNumber * tilesPerLevel) + (x + xLvTileWidth*y)];
     return ret;
-}
+};
