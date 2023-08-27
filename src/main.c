@@ -45,6 +45,7 @@ void playGame();
 void moveBaddies();
 void baddieCollisionDetect();
 void keyCollisionDetect();
+void ckAmountOfKeysCollected();
 void showDeathSequence();
 void handleInput();
 void handlePlayAnim();
@@ -215,6 +216,7 @@ void playGame(){
         }
         keyCollisionDetect();
         baddieCollisionDetect();
+        ckAmountOfKeysCollected();
         if (counter % 4 == 0){
             moveBaddies();
             counter = 0;
@@ -260,19 +262,19 @@ void baddieCollisionDetect(){
     for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
         if((willy.x > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
             (willy.y + 2 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
-            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 3);  
+            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 2);  
         }
         else if ((willy.x + 12 > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + 12 < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
             (willy.y + 2 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
-            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 3); 
+            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 2); 
         }
         else if((willy.x > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
             (willy.y + 14 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y + 14 < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
-            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 3);  
+            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 2);  
         }
         else if ((willy.x + 12 > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + 12 < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
             (willy.y + 14 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y + 14 < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
-            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 3); 
+            VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 2); 
         }
     }
 };
@@ -313,6 +315,12 @@ void keyCollisionDetect(){
         }
     }
 };
+void ckAmountOfKeysCollected(){
+    if (keyCounter >= allLvKeys[lvNumber]->numOfKeys){
+        lvNumber ++;
+        loadLevel();
+    }
+}
 void showDeathSequence(){
     /*
     The squashing boot when willy is out of lives
