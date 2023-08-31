@@ -45,6 +45,7 @@ extern const SpriteDefinition knoidea;
 extern const SpriteDefinition kp10;
 extern const SpriteDefinition ksquares;
 extern const SpriteDefinition kmoney;
+extern const SpriteDefinition gateMask;
 extern const SpriteDefinition dropFloor;
 extern const Image introScreen;
 extern const Image HUD;

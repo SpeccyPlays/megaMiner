@@ -26,7 +26,7 @@ typedef struct {
 
 //leave x and y positions as 0 as the start and end values all need to 
 //be updated with the offset values so might as well set positions then
-LvBaddies lv1Baddies = {1, {NULL, &lv1BdS, 64, 120, 56, 56, 0, 0, -1, TRUE, FALSE, 96, 56}};
+LvBaddies lv1Baddies = {1, {{NULL, &lv1BdS, 64, 120, 56, 56, 0, 0, -1, TRUE, FALSE, 96, 56}}};
 
 LvBaddies lv2Baddies = {2, {{NULL, &lv2BdS, 97, 232, 104, 104, 0, 0, -1, TRUE, FALSE, 176, 104}, 
                             {NULL, &lv2BdS, 8, 144, 24, 24, 0, 0, -1, TRUE, FALSE, 88, 24}}};
@@ -87,7 +87,7 @@ LvBaddies lv13Baddies = {5, {{NULL, &lv13BdS, 56, 232, 8, 8, 0, 0, -2, TRUE, FAL
                             {NULL, &lv13BdS, 56, 232, 80, 80, 0, 0, -1, TRUE, FALSE, 200, 80},
                             {NULL, &lv13BdS2, 40, 40, 8, 104, 0, 0, -1, FALSE, TRUE, 40, 88}}};
 //level 14 baddies have a falling pattern so need to work it out
-LvBaddies lv14Baddies = {0, {NULL, &lv13BdS, 0, 0, 0, 0, 0, 0, -1, FALSE, FALSE, 0, 0}};
+LvBaddies lv14Baddies = {0, {{NULL, &lv13BdS, 0, 0, 0, 0, 0, 0, -1, FALSE, FALSE, 0, 0}}};
 //faster baddies
 LvBaddies lv15Baddies = {3, {{NULL, &lv15BdS, 80, 80, 32, 104, 0, 0, -2, FALSE, TRUE, 80, 56},
                             {NULL, &lv15BdS, 128, 128, 32, 104, 0, 0, 1, FALSE, TRUE, 128, 88},

@@ -90,4 +90,5 @@ SPRITE  kp10                "tiles/keySprites/p10-Sheet.png" 1 1 FAST 1
 SPRITE  ksquares            "tiles/keySprites/squares-Sheet.png" 1 1 FAST 1
 SPRITE  kmoney              "tiles/keySprites/moneybag-Sheet.png" 1 1 FAST 1
 
+SPRITE  gateMask            "tiles/gateMask-sheet.png" 2 2 FAST 3
 SPRITE  dropFloor           "tiles/dropFloor-sheet.png" 1 1 FAST 12

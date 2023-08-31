@@ -26,12 +26,13 @@ u16 ind = TILE_USERINDEX;
 u16 baseInd = TILE_USERINDEX;
 //sprite stuff
 Sprite *boot = NULL;
+Sprite *gateMasking = NULL; //used to make it look like the gate is flashing
 //game stuff
 enum state gameState = INTRO;
 u8 lvNumber = 0;
 u8 numOfLvs = 20;
-u8 keyCounter = 0;
-//level sprites
+u8 keyCounter = 0; //number of keys collected
+bool isGateOpen = FALSE; //true if all keys are collected
 //declarations
 void applyOffsets();
 void playIntro();
@@ -64,7 +65,6 @@ u8 checkCollisionMap(u8 x, u8 y);
 int main()
 {
     applyOffsets();
-    SPR_init(0, 0, 0); //start sprite engine
     while(1){
         switch (gameState){
             case INTRO:
@@ -107,6 +107,14 @@ void applyOffsets(){
     }
 }
 void playIntro(){
+    /*
+    Loop the intro music until the player presses start then move to game state
+    */
+   //make sure SPR is cleared and ended first -may not really be needed 31-8-23
+    SPR_clear();
+    VDP_clearSprites();
+    SPR_end();
+    SPR_init(0, 0, 0);
     ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
     PAL_setPalette(PAL0, introScreen.palette->data, DMA);
     drawHud();
@@ -128,7 +136,6 @@ void drawHud(){
     /*
     Draw the score area at the bottom of the screen
     */
-    ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
     VDP_drawImageEx(BG_B, &HUD, TILE_ATTR_FULL(PAL0, TRUE, FALSE, FALSE, ind), 0+xOffset, 16+yOffset, FALSE, TRUE);
     ind += HUD.tileset->numTile;
     VDP_clearTextArea(xOffset, yOffset, 32, 168);
@@ -148,6 +155,10 @@ void loadLevel(){
     Doesn't need much of an explanation - initilise the sprite engine, draw the level, start the music
     Load ALL the sprites
     */
+   //make sure SPR is cleared and ended first -may not really be needed 31-8-23
+    SPR_clear();
+    VDP_clearSprites();
+    SPR_end();
     SPR_init(0, 0, 0);
     VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     XGM_setLoopNumber(-1);
@@ -156,6 +167,8 @@ void loadLevel(){
     loadBaddies();
     loadKeys();
     updateHud();
+    gateMasking = SPR_addSprite(&gateMask, 232+xOffsetPixel, 104+yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    SPR_setVisibility(gateMasking, HIDDEN);
     keyCounter = 0;
 };
 void loadPlayer(){
@@ -165,7 +178,7 @@ void loadPlayer(){
    willy.x = playerLvStart[lvNumber].x;
    willy.y = playerLvStart[lvNumber].y;
    willy.facingLeft = playerLvStart[lvNumber].facingLeft;
-   willy.pSprite = SPR_addSprite(willy.pSpriteDef, willy.x, willy.y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+   willy.pSprite = SPR_addSprite(willy.pSpriteDef, willy.x, willy.y, TILE_ATTR(PAL0, FALSE, FALSE, FALSE));
 }
 void loadBaddies(){
     /*
@@ -206,9 +219,9 @@ void playGame(){
             SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
             //below for debugging - showing willys x/y sprite values
             char ch[3] = "0";
-            sprintf(ch, "%d", willy.x - xOffsetPixel);
+            sprintf(ch, "%d", convertPixelValueToTile(willy.x + 3 - xOffsetPixel));
             VDP_drawText(ch, xOffset + 2, yOffset);
-            sprintf(ch, "%d", willy.y - yOffsetPixel);
+            sprintf(ch, "%d", convertPixelValueToTile(willy.y + 16 - yOffsetPixel));
             VDP_drawText(ch, xOffset + 6, yOffset);
             ch[3] = "0";
             sprintf(ch, "%d", keyCounter);
@@ -317,9 +330,13 @@ void keyCollisionDetect(){
     }
 };
 void ckAmountOfKeysCollected(){
+    /*
+    Check if all the keys for the level have been collected and show the gate sprite if so
+    */
     if (keyCounter >= allLvKeys[lvNumber]->numOfKeys){
-        lvNumber ++;
-        loadLevel();
+        isGateOpen = TRUE;
+        SPR_setVisibility(gateMasking, VISIBLE);
+        keyCounter = 0;
     }
 }
 void showDeathSequence(){
@@ -329,15 +346,16 @@ void showDeathSequence(){
     SPR_init(0, 0, 0);
     drawHud();
     VDP_drawImageEx(BG_B, &deathScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-    ind += deathScreen.tileset->numTile;
-    boot = SPR_addSprite(&deathBoot, (16 + xOffset) * 8, (yOffset) * 8, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    //ind += deathScreen.tileset->numTile;
+    boot = SPR_addSprite(&deathBoot, 128  + xOffsetPixel , yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     for (u16 j = 0; j < 90; j++){
         SPR_update();
         SYS_doVBlankProcess();
     }
     SPR_clear();
-    gameState = INTRO;
     VDP_clearSprites();
+    SPR_end();
+    gameState = INTRO;
 };
 void handleInput(){
     /*
@@ -457,11 +475,11 @@ u8 collideDown(u16 x, u16 y){
     u8 y1 = convertPixelValueToTile((y + 16) - yOffsetPixel);
     u8 tileL = checkCollisionMap(x1, y1);
     u8 tileR = checkCollisionMap(x2, y1);
-    if (tileL != NOTILE || tileR != NOTILE){
-        return 1;
+    if ((tileL == NOTILE && tileR == NOTILE) || (tileL == ENDGATE && tileR == ENDGATE)){
+        return 0;
     }
     else{
-        return 0;
+        return 1;
     }
 };
 u8 collideUp(u16 x, u16 y){
@@ -479,7 +497,7 @@ u8 collideUp(u16 x, u16 y){
 };
 u8 collideLeft(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - xOffsetPixel);
-    u8 y1 = convertPixelValueToTile(y + 8 - yOffsetPixel);
+    u8 y1 = convertPixelValueToTile(y + 3 - yOffsetPixel);
     u8 tileB = checkCollisionMap(x1, y1);
     if (tileB == BRICK){
         willy.x += 1;

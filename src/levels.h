@@ -8,7 +8,7 @@ typedef struct {
 	/* data */
 	u16 x;
 	u16 y;
-	bool facingLeft
+	bool facingLeft;
 } LvStart;
 
 LvStart playerLvStart[] = {{16, 104, FALSE},{16, 104, FALSE},{16, 104, FALSE},{224, 104, TRUE},{16, 24, FALSE},
