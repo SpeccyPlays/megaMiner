@@ -66,6 +66,8 @@ u8 checkCollisionMap(u8 x, u8 y);
 int main()
 {
     applyOffsets();
+    VDP_setScreenWidth320();
+    VDP_setScreenHeight224();
     while(1){
         switch (gameState){
             case INTRO:
@@ -112,26 +114,37 @@ void applyOffsets(){
 void playIntro(){
     /*
     Loop the intro music until the player presses start then move to game state
+    Flash the background at regular intervals as per original
     */
    //make sure SPR is cleared and ended first -may not really be needed 31-8-23
     SPR_clear();
     VDP_clearSprites();
     SPR_end();
     SPR_init(0, 0, 0);
-    ind = baseInd; //so we're overwriting previous level data instead of filling all memory with level data
-    PAL_setPalette(PAL0, introScreen.palette->data, DMA);
     drawHud();
+    PAL_setPalette(PAL0, introScreen.palette->data, DMA);
     VDP_drawImageEx(BG_B, &introScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-    //ind += introScreen.tileset->numTile;
     XGM_setLoopNumber(-1);
     XGM_startPlay(&intro);
+    VDP_setBackgroundColor(2);
+    u8 counter = 0;
+    u8 colorInd = 1;
     while (gameState == INTRO){
         u16 value = JOY_readJoypad(JOY_1);
 	    if(value & BUTTON_START){
            gameState = PLAY;
            break;
         }
+        if (counter % 25 == 0){
+            VDP_setBackgroundColor(colorInd);
+            colorInd ++;
+            counter = 0;
+        }
+        if (colorInd > 11){
+            colorInd = 0;
+        }
         SYS_doVBlankProcess();
+        counter ++;
     }
     XGM_stopPlay();
 };
@@ -139,6 +152,7 @@ void drawHud(){
     /*
     Draw the score area at the bottom of the screen
     */
+    ind = baseInd;
     VDP_drawImageEx(BG_B, &HUD, TILE_ATTR_FULL(PAL0, TRUE, FALSE, FALSE, ind), 0+xOffset, 16+yOffset, FALSE, TRUE);
     ind += HUD.tileset->numTile;
     VDP_clearTextArea(xOffset, yOffset, 32, 168);
@@ -151,7 +165,9 @@ void updateHud(){
     VDP_drawText(levelNames[lvNumber], xOffset, 16 + yOffset);
     VDP_drawText("AIR", 0 + xOffset, 17 + yOffset);
     VDP_drawText("High Score", 0 + xOffset, 18 + yOffset);
+    VDP_drawText("00000", 11 + xOffset, 18 + yOffset);
     VDP_drawText("Score", 21 + xOffset, 18 + yOffset);
+    VDP_drawText("00000", 27 + xOffset, 18 + yOffset);
 }
 void loadLevel(){
     /*
@@ -164,6 +180,7 @@ void loadLevel(){
     SPR_end();
     SPR_init(0, 0, 0);
     VDP_drawImageEx(BG_B, levelsBG[lvNumber], TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
+    VDP_setBackgroundColor(1);
     XGM_setLoopNumber(-1);
     XGM_startPlay(&megaMinerMain);
     loadPlayer();
@@ -336,6 +353,7 @@ void keyCollisionDetect(){
 void ckAmountOfKeysCollected(){
     /*
     Check if all the keys for the level have been collected and show the gate sprite if so
+    Set it so that the gate is open for collision
     */
     if (keyCounter >= allLvKeys[lvNumber]->numOfKeys){
         isGateOpen = TRUE;
@@ -344,6 +362,9 @@ void ckAmountOfKeysCollected(){
     }
 }
 void completeLv(){
+    /*
+    Actions once all keys are collected and player has entered the gate
+    */
     lvNumber += 1;
     if (lvNumber > 19){
         lvNumber = 0;
@@ -356,20 +377,17 @@ void completeLv(){
 }
 void showDeathSequence(){
     /*
-    The squashing boot when willy is out of lives
+    The squashing boot sequence when willy is out of lives
     */
     SPR_init(0, 0, 0);
     drawHud();
     VDP_drawImageEx(BG_B, &deathScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-    //ind += deathScreen.tileset->numTile;
-    boot = SPR_addSprite(&deathBoot, 128  + xOffsetPixel , yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    for (u16 j = 0; j < 90; j++){
+    boot = SPR_addSprite(&deathBoot, 128  + xOffsetPixel , -104 - yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    for (u16 j = 0; j < 104; j++){
+        SPR_setPosition(boot, 128  + xOffsetPixel, j);
         SPR_update();
         SYS_doVBlankProcess();
     }
-    SPR_clear();
-    VDP_clearSprites();
-    SPR_end();
     gameState = INTRO;
 };
 void handleInput(){
