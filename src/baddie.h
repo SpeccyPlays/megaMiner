@@ -38,7 +38,7 @@ LvBaddies lv3Baddies = {3, {{NULL, &lv3BdS, 8, 152, 104, 104, 0, 0, -1, TRUE, FA
 LvBaddies lv4Baddies = {2, {{NULL, &lv4BdS, 8, 80, 104, 104, 0, 0, -1, TRUE, FALSE, 72, 104},
                             {NULL, &lv4BdS, 48, 128, 104, 104, 0, 0, -1, TRUE, FALSE, 96, 104}}};
 
-LvBaddies lv5Baddies = {3, {{NULL, &lv5BdS, 8, 96, 24, 24, 0, 0, 1, FALSE, FALSE, 24, 24},
+LvBaddies lv5Baddies = {3, {{NULL, &lv5BdS, 8, 96, 24, 24, 0, 0, 1, FALSE, FALSE, 40, 24},
                             {NULL, &lv5BdS, 32, 96, 56, 56, 0, 0, -1, TRUE, FALSE, 72, 56},
                             {NULL, &lv5BdS2, 120, 120, 0, 88, 0, 0, 1, FALSE, TRUE, 120, 44}}};
 

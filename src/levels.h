@@ -3,6 +3,7 @@
 #include <genesis.h>
 #include <resources.h>
 #include "baddie.h"
+#include "collectables.h"
 
 typedef struct {
 	/* data */
@@ -16,7 +17,11 @@ LvStart playerLvStart[] = {{16, 104, FALSE},{16, 104, FALSE},{16, 104, FALSE},{2
 							{24, 8, FALSE},{16, 104, FALSE},{232, 104, TRUE},{232, 104, TRUE},{16, 104, FALSE},
 							{16, 104, FALSE},{16, 24, FALSE},{232, 104, TRUE},{104, 48, FALSE},{224, 104, TRUE}};
 
-
+CoOrds gatePos[] = {{.x = 232, .y = 104},{.x = 232, .y = 104},{.x = 232, .y = 88},{.x = 232, .y = 8},
+					{.x = 120, .y = 104},{.x = 232, .y = 0}, {.x = 120, .y = 104},{.x = 120, .y = 104},
+					{.x = 8, .y = 0},{.x = 96, .y = 104},{.x = 8, .y = 8},{.x = 120, .y = 104},{.x = 8, .y = 104},
+					{.x = 120, .y = 0},{.x = 8, .y = 24},{.x = 96, .y = 40},{.x = 232, .y = 8},{.x = 232, .y = 0},
+					{.x = 8, .y = 8},{.x = 152, .y = 40}};
 
 const Image *levelsBG[20] = {&level1, &level2, &level3, &level4, &level5, &level6, &level7, &level8,
                             &level9, &level10, &level11, &level12, &level13, &level14, &level15, &level16,

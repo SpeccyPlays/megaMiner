@@ -47,6 +47,7 @@ void moveBaddies();
 void baddieCollisionDetect();
 void keyCollisionDetect();
 void ckAmountOfKeysCollected();
+void completeLv();
 void showDeathSequence();
 void handleInput();
 void handlePlayAnim();
@@ -104,6 +105,8 @@ void applyOffsets(){
         }
         playerLvStart[lv].x += xOffsetPixel;
         playerLvStart[lv].y += yOffsetPixel;
+        gatePos[lv].x += xOffsetPixel;
+        gatePos[lv].y += yOffsetPixel;
     }
 }
 void playIntro(){
@@ -167,9 +170,10 @@ void loadLevel(){
     loadBaddies();
     loadKeys();
     updateHud();
-    gateMasking = SPR_addSprite(&gateMask, 232+xOffsetPixel, 104+yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    gateMasking = SPR_addSprite(&gateMask, gatePos[lvNumber].x, gatePos[lvNumber].y, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
     SPR_setVisibility(gateMasking, HIDDEN);
     keyCounter = 0;
+    isGateOpen = FALSE;
 };
 void loadPlayer(){
     /*
@@ -339,6 +343,17 @@ void ckAmountOfKeysCollected(){
         keyCounter = 0;
     }
 }
+void completeLv(){
+    lvNumber += 1;
+    if (lvNumber > 19){
+        lvNumber = 0;
+    }
+    SPR_clear();
+    VDP_clearSprites();
+    drawHud();
+    loadLevel();
+    SYS_doVBlankProcess();
+}
 void showDeathSequence(){
     /*
     The squashing boot when willy is out of lives
@@ -384,15 +399,7 @@ void handleInput(){
             willy.pJumpOrFall = JUMPING;
         }
         else if (value & BUTTON_C){
-            lvNumber += 1;
-            if (lvNumber > 19){
-                lvNumber = 0;
-            }
-            SPR_clear();
-            VDP_clearSprites();
-            drawHud();
-            loadLevel();
-            SYS_doVBlankProcess();
+            completeLv();
         }
         else if (value & BUTTON_A){
             lvNumber = 0;
@@ -478,6 +485,10 @@ u8 collideDown(u16 x, u16 y){
     if ((tileL == NOTILE && tileR == NOTILE) || (tileL == ENDGATE && tileR == ENDGATE)){
         return 0;
     }
+    else if (isGateOpen == TRUE && (tileL == ENDGATE || tileR == ENDGATE)){
+        completeLv();
+        return 0;
+    }
     else{
         return 1;
     }
@@ -491,6 +502,10 @@ u8 collideUp(u16 x, u16 y){
     if (tileL == BRICK || tileR == BRICK){
         return 1;
     }
+    else if (isGateOpen == TRUE && (tileL == ENDGATE || tileR == ENDGATE)){
+        completeLv();
+        return 0;
+    }
     else{
         return 0;
     }
@@ -502,6 +517,10 @@ u8 collideLeft(u16 x, u16 y){
     if (tileB == BRICK){
         willy.x += 1;
         return 1;
+    }
+    else if (isGateOpen == TRUE && tileB == ENDGATE){
+        completeLv();
+        return 0;
     }
     else{
         //VDP_drawText("               ", xOffset + 1, yOffset + 2);
@@ -517,6 +536,10 @@ u8 collideRight(u16 x, u16 y){
         //VDP_drawText("Collision RIGHT", xOffset + 1, yOffset + 2);
         willy.x -=1;
         return 1;
+    }
+    else if (isGateOpen == TRUE && tileB == ENDGATE){
+        completeLv();
+        return 0;
     }
     else{
         //VDP_drawText("               ", xOffset + 1, yOffset + 2);
