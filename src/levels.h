@@ -12,6 +12,8 @@ typedef struct {
 	bool facingLeft;
 } LvStart;
 
+Sprite *lives[2];
+
 LvStart playerLvStart[] = {{16, 104, FALSE},{16, 104, FALSE},{16, 104, FALSE},{224, 104, TRUE},{16, 24, FALSE},
 							{128, 24, TRUE},{16, 104, FALSE},{16, 104, FALSE},{8, 104, FALSE},{8, 32, FALSE},
 							{24, 8, FALSE},{16, 104, FALSE},{232, 104, TRUE},{232, 104, TRUE},{16, 104, FALSE},

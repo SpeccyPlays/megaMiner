@@ -33,6 +33,8 @@ u8 lvNumber = 0;
 u8 numOfLvs = 20;
 u8 keyCounter = 0; //number of keys collected
 bool isGateOpen = FALSE; //true if all keys are collected
+u8 noOfLives = 3;
+u8 noOfDeaths = 0;
 //declarations
 void applyOffsets();
 void playIntro();
@@ -126,9 +128,9 @@ void playIntro(){
     VDP_drawImageEx(BG_B, &introScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
     XGM_setLoopNumber(-1);
     XGM_startPlay(&intro);
-    VDP_setBackgroundColor(2);
+    VDP_setBackgroundColor(0);
     u8 counter = 0;
-    u8 colorInd = 1;
+    u8 colorInd = 1;//index number in pallete
     while (gameState == INTRO){
         u16 value = JOY_readJoypad(JOY_1);
 	    if(value & BUTTON_START){
@@ -161,6 +163,9 @@ void updateHud(){
     /*
     Add the data to the score area
     */
+   for (u8 i = 0; i < (noOfLives - noOfDeaths); i++){
+        lives[i] = SPR_addSprite(&lifeSprite, xOffsetPixel + (i * 16), 156 + yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+   }
     VDP_setPaletteColor(15, RGB8_8_8_TO_VDPCOLOR(255, 255, 255));
     VDP_drawText(levelNames[lvNumber], xOffset, 16 + yOffset);
     VDP_drawText("AIR", 0 + xOffset, 17 + yOffset);
@@ -245,7 +250,7 @@ void playGame(){
             sprintf(ch, "%d", convertPixelValueToTile(willy.y + 16 - yOffsetPixel));
             VDP_drawText(ch, xOffset + 6, yOffset);
             ch[3] = "0";
-            sprintf(ch, "%d", keyCounter);
+            sprintf(ch, "%d", (noOfLives - noOfDeaths));
             VDP_drawText(ch, xOffset + 2, yOffset+ 1);
         }
         keyCollisionDetect();
@@ -378,13 +383,13 @@ void completeLv(){
 void showDeathSequence(){
     /*
     The squashing boot sequence when willy is out of lives
+    The loop is not an accurate measure but roughly how long it takes for the boot to get down
     */
     SPR_init(0, 0, 0);
     drawHud();
     VDP_drawImageEx(BG_B, &deathScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
-    boot = SPR_addSprite(&deathBoot, 128  + xOffsetPixel , -104 - yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
-    for (u16 j = 0; j < 104; j++){
-        SPR_setPosition(boot, 128  + xOffsetPixel, j);
+    boot = SPR_addSprite(&deathBoot, 128  + xOffsetPixel , yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
+    for (u16 j = 0; j < 130; j++){
         SPR_update();
         SYS_doVBlankProcess();
     }
@@ -418,6 +423,7 @@ void handleInput(){
         }
         else if (value & BUTTON_C){
             completeLv();
+            noOfDeaths ++;
         }
         else if (value & BUTTON_A){
             lvNumber = 0;
