@@ -2,6 +2,7 @@
 #define MAINPLAYER_H
 #include <genesis.h>
 #include <resources.h>
+#include "globalstruct.h"
 
 //player stuff
 enum movements {STAND = 0, WALKLEFT = 1 , WALKRIGHT = 2, DEAD = 3, BLOCKED = 4};

@@ -3,7 +3,7 @@
 #include <genesis.h>
 #include <resources.h>
 #include "baddie.h"
-#include "collectables.h"
+#include "globalstruct.h"
 
 typedef struct {
 	/* data */
@@ -12,7 +12,7 @@ typedef struct {
 	bool facingLeft;
 } LvStart;
 
-Sprite *lives[2];
+Sprite *lives[3];
 
 LvStart playerLvStart[] = {{16, 104, FALSE},{16, 104, FALSE},{16, 104, FALSE},{224, 104, TRUE},{16, 24, FALSE},
 							{128, 24, TRUE},{16, 104, FALSE},{16, 104, FALSE},{8, 104, FALSE},{8, 32, FALSE},

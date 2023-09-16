@@ -2,6 +2,7 @@
 #define BADDIE_H
 #include <genesis.h>
 #include <resources.h>
+#include "globalstruct.h"
 
 typedef struct {
     Sprite *eSprite;

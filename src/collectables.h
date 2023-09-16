@@ -2,15 +2,13 @@
 #define COLLECTABLES_H
 #include <genesis.h>
 #include <resources.h>
+#include "globalstruct.h"
 
 /*
 Need to make sure keys are all individual objects so we can remove them when collected by player
 */
 
-typedef struct {
-    u16 x;
-    u16 y;
-} CoOrds;
+
 typedef struct {
     Sprite *kSprite;
     const SpriteDefinition *kSpriteDef;
