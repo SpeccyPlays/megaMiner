@@ -27,6 +27,9 @@ u16 baseInd = TILE_USERINDEX;
 //sprite stuff
 Sprite *boot = NULL;
 Sprite *gateMasking = NULL; //used to make it look like the gate is flashing
+//both used for offset
+u8 pixelLeft = 3; 
+u8 pixelRight = 14;
 //game stuff
 enum state gameState = INTRO;
 u8 lvNumber = 0;
@@ -162,6 +165,7 @@ void drawHud(){
 void updateHud(){
     /*
     Add the data to the score area
+    Draw the sprites to show how many lives left
     */
    for (u8 i = 0; i < (noOfLives - noOfDeaths); i++){
         lives[i] = SPR_addSprite(&lifeSprite, xOffsetPixel + (i * 16), 156 + yOffsetPixel, TILE_ATTR(PAL0, TRUE, FALSE, FALSE));
@@ -300,19 +304,19 @@ void baddieCollisionDetect(){
     Check through baddie positions for current level to see if they hit willy
     */
     for (u8 i = 0; i < allLvBaddies[lvNumber]->numOfBaddies; i++){
-        if((willy.x > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
+        if((willy.x + pixelLeft > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + pixelLeft < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
             (willy.y + 2 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
             VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 2);  
         }
-        else if ((willy.x + 12 > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + 12 < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
+        else if ((willy.x + pixelRight > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + pixelRight < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
             (willy.y + 2 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
             VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 2); 
         }
-        else if((willy.x > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
+        else if((willy.x + pixelLeft > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + pixelLeft < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
             (willy.y + 14 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y + 14 < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
             VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 2);  
         }
-        else if ((willy.x + 12 > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + 12 < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
+        else if ((willy.x + pixelRight > allLvBaddies[lvNumber]->Baddies[i].xPos + 4) & (willy.x + pixelRight < allLvBaddies[lvNumber]->Baddies[i].xPos + 12) & 
             (willy.y + 14 > allLvBaddies[lvNumber]->Baddies[i].yPos) & (willy.y + 14 < allLvBaddies[lvNumber]->Baddies[i].yPos + 14)){
             VDP_drawText("        XHIT          ", xOffset + 2, yOffset + 2); 
         }
@@ -325,28 +329,28 @@ void keyCollisionDetect(){
     */
 
     for (u8 i = 0; i < allLvKeys[lvNumber]->numOfKeys; i++){
-        if((willy.x + 3 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 3 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
+        if((willy.x + pixelLeft > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + pixelLeft < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
             (willy.y + 1 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y < allLvKeys[lvNumber]->tKeys[i].xy.y + 8) &
             (allLvKeys[lvNumber]->tKeys[i].kShow == TRUE)){
             allLvKeys[lvNumber]->tKeys[i].kShow = FALSE;
             keyCounter ++;
             SPR_releaseSprite(allLvKeys[lvNumber]->tKeys[i].kSprite);
         }
-        else if ((willy.x + 12 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 12 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
+        else if ((willy.x + pixelRight > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + pixelRight < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
             (willy.y + 1> allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y < allLvKeys[lvNumber]->tKeys[i].xy.y + 8) &
             (allLvKeys[lvNumber]->tKeys[i].kShow == TRUE)){
             allLvKeys[lvNumber]->tKeys[i].kShow = FALSE;
             keyCounter ++;
             SPR_releaseSprite(allLvKeys[lvNumber]->tKeys[i].kSprite);
         }
-        else if((willy.x + 3 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 3 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
+        else if((willy.x + pixelLeft > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + pixelLeft < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
             (willy.y + 14 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y + 14 < allLvKeys[lvNumber]->tKeys[i].xy.y + 8) &
             (allLvKeys[lvNumber]->tKeys[i].kShow == TRUE)){
             allLvKeys[lvNumber]->tKeys[i].kShow = FALSE;
             keyCounter ++;
             SPR_releaseSprite(allLvKeys[lvNumber]->tKeys[i].kSprite);
         }
-        else if ((willy.x + 12 > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + 12 < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
+        else if ((willy.x + pixelRight > allLvKeys[lvNumber]->tKeys[i].xy.x) & (willy.x + pixelRight < allLvKeys[lvNumber]->tKeys[i].xy.x + 8) & 
             (willy.y + 14 > allLvKeys[lvNumber]->tKeys[i].xy.y) & (willy.y + 14 < allLvKeys[lvNumber]->tKeys[i].xy.y + 8) &
             (allLvKeys[lvNumber]->tKeys[i].kShow == TRUE)){
             allLvKeys[lvNumber]->tKeys[i].kShow = FALSE;
@@ -385,6 +389,8 @@ void showDeathSequence(){
     The squashing boot sequence when willy is out of lives
     The loop is not an accurate measure but roughly how long it takes for the boot to get down
     */
+    noOfLives = 3;
+    noOfDeaths = 0;
     SPR_init(0, 0, 0);
     drawHud();
     VDP_drawImageEx(BG_B, &deathScreen, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind), 0+xOffset, 0+yOffset, FALSE, TRUE);
@@ -422,8 +428,9 @@ void handleInput(){
             willy.pJumpOrFall = JUMPING;
         }
         else if (value & BUTTON_C){
-            completeLv();
             noOfDeaths ++;
+            completeLv();
+            
         }
         else if (value & BUTTON_A){
             lvNumber = 0;
