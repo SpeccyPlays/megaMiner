@@ -27,9 +27,9 @@ u16 baseInd = TILE_USERINDEX;
 //sprite stuff
 Sprite *boot = NULL;
 Sprite *gateMasking = NULL; //used to make it look like the gate is flashing
-//both used for offset
-u8 pixelLeft = 3; 
-u8 pixelRight = 14;
+//both used for willy offset for collisions
+u8 pixelLeft = 4; 
+u8 pixelRight = 12;
 //game stuff
 enum state gameState = INTRO;
 u8 lvNumber = 0;
@@ -93,7 +93,7 @@ void applyOffsets(){
     Due to the fact the zx spectrum had a smaller screen than the Megadrive
     We need to have offsets to center the screen
     All sprites need this offset applied so better to do once here
-    then we don't need to worry about it again
+    then we don't need to worry about it again even if it's blowing RAM up
     */
     xOffsetPixel = xOffset * 8;
     yOffsetPixel = yOffset * 8;
@@ -110,8 +110,8 @@ void applyOffsets(){
             allLvKeys[lv]->tKeys[i].xy.x += xOffsetPixel;
             allLvKeys[lv]->tKeys[i].xy.y += yOffsetPixel;
         }
-        playerLvStart[lv].x += xOffsetPixel;
-        playerLvStart[lv].y += yOffsetPixel;
+        playerLvStart[lv].startPos.x += xOffsetPixel;
+        playerLvStart[lv].startPos.y += yOffsetPixel;
         gatePos[lv].x += xOffsetPixel;
         gatePos[lv].y += yOffsetPixel;
     }
@@ -205,8 +205,8 @@ void loadPlayer(){
     /*
     Does what it says on the tin. Loads player
     */
-   willy.x = playerLvStart[lvNumber].x;
-   willy.y = playerLvStart[lvNumber].y;
+   willy.x = playerLvStart[lvNumber].startPos.x;
+   willy.y = playerLvStart[lvNumber].startPos.y;
    willy.facingLeft = playerLvStart[lvNumber].facingLeft;
    willy.pSprite = SPR_addSprite(willy.pSpriteDef, willy.x, willy.y, TILE_ATTR(PAL0, FALSE, FALSE, FALSE));
 }
@@ -249,7 +249,7 @@ void playGame(){
             SPR_setAnim(willy.pSprite, willy.currentSpriteNum);
             //below for debugging - showing willys x/y sprite values
             char ch[3] = "0";
-            sprintf(ch, "%d", convertPixelValueToTile(willy.x + 3 - xOffsetPixel));
+            sprintf(ch, "%d", convertPixelValueToTile(willy.x + pixelLeft - xOffsetPixel));
             VDP_drawText(ch, xOffset + 2, yOffset);
             sprintf(ch, "%d", convertPixelValueToTile(willy.y + 16 - yOffsetPixel));
             VDP_drawText(ch, xOffset + 6, yOffset);
@@ -509,7 +509,7 @@ void pCollisions(u16 x, u16 y){
 };
 u8 collideDown(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - xOffsetPixel);
-    u8 x2 = convertPixelValueToTile(x + 14 - xOffsetPixel);
+    u8 x2 = convertPixelValueToTile(x + 12 - xOffsetPixel);
     u8 y1 = convertPixelValueToTile((y + 16) - yOffsetPixel);
     u8 tileL = checkCollisionMap(x1, y1);
     u8 tileR = checkCollisionMap(x2, y1);
@@ -526,7 +526,7 @@ u8 collideDown(u16 x, u16 y){
 };
 u8 collideUp(u16 x, u16 y){
     u8 x1 = convertPixelValueToTile(x + 3 - xOffsetPixel);
-    u8 x2 = convertPixelValueToTile(x + 14 - xOffsetPixel);
+    u8 x2 = convertPixelValueToTile(x + 12 - xOffsetPixel);
     u8 y1 = convertPixelValueToTile(y + 0 - yOffsetPixel);
     u8 tileL = checkCollisionMap(x1, y1);
     u8 tileR = checkCollisionMap(x2, y1);
@@ -559,7 +559,7 @@ u8 collideLeft(u16 x, u16 y){
     }
 };
 u8 collideRight(u16 x, u16 y){
-    u8 x1 = convertPixelValueToTile(x + 14 - xOffsetPixel);
+    u8 x1 = convertPixelValueToTile(x + 12 - xOffsetPixel);
     u8 y1 = convertPixelValueToTile(y + 8 - yOffsetPixel);
     //u8 tileT = levelMap[y1][x1];
     u8 tileB = checkCollisionMap(x1, y1);

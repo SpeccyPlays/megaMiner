@@ -7,15 +7,17 @@
 
 typedef struct {
 	/* data */
-	u16 x;
-	u16 y;
+	CoOrds startPos;
 	bool facingLeft;
 } LvStart;
 
-LvStart playerLvStart[] = {{16, 104, FALSE},{16, 104, FALSE},{16, 104, FALSE},{224, 104, TRUE},{16, 24, FALSE},
-							{128, 24, TRUE},{16, 104, FALSE},{16, 104, FALSE},{8, 104, FALSE},{8, 32, FALSE},
-							{24, 8, FALSE},{16, 104, FALSE},{232, 104, TRUE},{232, 104, TRUE},{16, 104, FALSE},
-							{16, 104, FALSE},{16, 24, FALSE},{232, 104, TRUE},{104, 48, FALSE},{224, 104, TRUE}};
+LvStart playerLvStart[] = {{{.x = 16, .y = 104}, FALSE},{{.x = 16, .y = 104}, FALSE},{{.x = 16, .y = 104}, FALSE},
+							{{.x = 224, .y = 104}, TRUE},{{.x = 16, .y = 24}, FALSE}, {{.x = 128, .y = 24}, TRUE},
+							{{.x = 16, .y = 104}, FALSE},{{.x = 16, .y = 104}, FALSE},{{.x = 8, .y = 104}, FALSE},
+							{{.x = 8, .y = 32}, FALSE},{{.x = 24, .y = 8}, FALSE},{{.x = 16, .y = 104}, FALSE},
+							{{.x = 232, .y = 104}, TRUE},{{.x = 232, .y = 104}, TRUE},{{.x = 16,.y = 104}, FALSE},
+							{{.x = 16, .y = 104}, FALSE},{{.x = 16, .y = 24}, FALSE},{{.x = 232, .y = 104}, TRUE},
+							{{.x = 104, .y = 48}, FALSE},{{.x = 224, .y = 104}, TRUE}};
 
 CoOrds gatePos[] = {{.x = 232, .y = 104},{.x = 232, .y = 104},{.x = 232, .y = 88},{.x = 232, .y = 8},
 					{.x = 120, .y = 104},{.x = 232, .y = 0}, {.x = 120, .y = 104},{.x = 120, .y = 104},
